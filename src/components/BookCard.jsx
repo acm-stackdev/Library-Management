@@ -12,9 +12,9 @@ export default function BookCard({ book }) {
     : book.coverImage;
 
   return (
-    <div className="bg-card rounded-2xl shadow-md border border-border-subtle hover:shadow-xl transition-all transform hover:-translate-y-1 group relative">
-      <Link to={`/book/${book.bookId}`} className="block p-4">
-        <div className="aspect-3/4 bg-muted/10 rounded-xl mb-4 flex items-center justify-center overflow-hidden relative">
+    <div className="bg-card rounded-2xl shadow-md border border-border-subtle hover:shadow-xl transition-all transform hover:-translate-y-1 group relative overflow-hidden">
+      <Link to={`/book/${book.bookId}`} className="block">
+        <div className="aspect-3/4 bg-muted/10 flex items-center justify-center relative">
           {coverUrl ? (
             <img
               src={coverUrl}
@@ -29,27 +29,16 @@ export default function BookCard({ book }) {
           ) : (
             <span className="text-muted text-4xl">📚</span>
           )}
-        </div>
 
-        <div className="space-y-1">
-          <span className="text-[10px] font-bold text-accent uppercase tracking-widest">
-            {book.categoryName || "General"}
-          </span>
-          <h3 className="text-lg font-bold text-foreground line-clamp-1 group-hover:text-accent transition-colors">
-            {book.title}
-          </h3>
-          <p className="text-muted text-xs font-medium line-clamp-1">
-            {book.authorNames?.join(", ") || book.author}
-          </p>
-        </div>
-
-        <div className="flex justify-between items-center mt-4 pt-3 border-t border-border-subtle">
-          <span className="text-xs font-bold text-muted">
-            {book.publishedYear}
-          </span>
-          <span className="text-accent text-xs font-bold group-hover:underline underline-offset-4 decoration-2">
-            Details →
-          </span>
+          {/* Permanent Transparent Overlay */}
+          <div className="absolute inset-x-0 bottom-0 p-5 bg-linear-to-t from-black/95 via-black/50 to-transparent pt-12">
+            <h3 className="text-white text-lg font-bold line-clamp-2 leading-tight">
+              {book.title}
+            </h3>
+            <p className="text-white/70 text-xs mt-1 line-clamp-1">
+              {book.authorNames?.join(", ") || book.author}
+            </p>
+          </div>
         </div>
       </Link>
 
@@ -59,7 +48,7 @@ export default function BookCard({ book }) {
             e.preventDefault();
             setIsLiked(!isLiked);
           }}
-          className={`absolute top-6 right-6 p-2 rounded-xl backdrop-blur-md transition-all shadow-lg z-10 ${
+          className={`absolute top-4 right-4 p-2 rounded-xl backdrop-blur-md transition-all shadow-lg z-10 ${
             isLiked
               ? "bg-red-500 text-white"
               : "bg-black/20 text-white hover:bg-black/40"

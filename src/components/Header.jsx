@@ -2,7 +2,7 @@ import { Sun, Moon, LogOut, User, ChevronDown } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import LoginModal from "./Login";
+import AuthModal from "./AuthModal";
 import Button from "./Button";
 
 export default function Header() {
@@ -122,10 +122,7 @@ export default function Header() {
         </div>
       </header>
 
-      <LoginModal
-        isOpen={isLoginOpen}
-        onClose={() => setIsLoginOpen(false)}
-      />
+      <AuthModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
     </>
   );
 }
