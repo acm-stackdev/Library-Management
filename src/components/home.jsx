@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import { booksService } from "../services/apiservices";
 import BookCard from "./BookCard";
 
 export default function Home() {
@@ -11,9 +11,8 @@ export default function Home() {
     const fetchBooks = async () => {
       try {
         setLoading(true);
-        // Replace with your actual backend API endpoint
-        const response = await axios.get("http://localhost:5136/api/books");
-        setBooks(response.data);
+        const data = await booksService.getAll();
+        setBooks(data);
       } catch (err) {
         console.error("Error fetching books:", err);
         setError("Failed to load books. Please try again later.");

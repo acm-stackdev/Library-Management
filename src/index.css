@@ -9,6 +9,12 @@
   --color-muted: var(--text-muted);
   --color-border-subtle: var(--border-main);
   --color-accent: var(--accent-main);
+  --color-success: #10b981; /* emerald-500 */
+  --color-warning: #f59e0b; /* amber-500 */
+}
+
+html {
+  scrollbar-gutter: stable;
 }
 
 :root {
@@ -19,6 +25,8 @@
   --text-muted: #4b5563; /* gray-600 */
   --border-main: #e5e7eb; /* gray-200 */
   --accent-main: #2563eb; /* blue-600 */
+  --success: #10b981;
+  --warning: #f59e0b;
 
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
