@@ -3,7 +3,7 @@ import { useAuth } from "../../context/AuthContext";
 import Button from "../Button";
 import { Eye, EyeOff } from "lucide-react";
 
-export default function LoginForm({ step, setStep, onSuccess, email, setEmail, toggleView }) {
+export default function LoginForm({ step, setStep, onSuccess, email, setEmail, toggleView, onForgot }) {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
@@ -109,6 +109,16 @@ export default function LoginForm({ step, setStep, onSuccess, email, setEmail, t
                 {error}
               </div>
             )}
+
+            <div className="flex justify-start">
+              <button
+                type="button"
+                onClick={onForgot}
+                className="text-accent font-bold text-sm hover:underline underline-offset-4 transition-all"
+              >
+                Forgot password?
+              </button>
+            </div>
           </div>
 
           <div className="flex justify-end pt-8">

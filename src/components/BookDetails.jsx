@@ -157,14 +157,6 @@ export default function BookDetails() {
 
             {/* Right Column: Info */}
             <div className="flex-1 space-y-8 my-auto">
-              <div className="flex flex-wrap gap-3">
-                <span className={`inline-flex items-center text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider ${
-                  book.available !== false ? "bg-success/10 text-success" : "bg-warning/10 text-warning"
-                }`}>
-                  {book.available !== false ? "Available" : "Checked Out"}
-                </span>
-              </div>
-
               <div className="space-y-4">
                 <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
                   <span className="w-1.5 h-6 bg-accent rounded-full"></span>

@@ -3,12 +3,15 @@ import { X, ChevronLeft } from "lucide-react";
 import LoginForm from "./auth/LoginForm";
 import RegisterForm from "./auth/RegisterForm";
 import RegistrationSuccess from "./auth/RegistrationSuccess";
+import ForgotForm from "./auth/ForgotForm";
+import ResetForm from "./auth/ResetForm";
 
 export default function AuthModal({ isOpen, onClose }) {
-  const [view, setView] = useState("login"); // 'login', 'register', 'success'
+  const [view, setView] = useState("login"); // 'login', 'register', 'success', 'forgot', 'reset'
   const [step, setStep] = useState(1); // 1 or 2
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
+  const [token, setToken] = useState("");
 
   useEffect(() => {
     if (isOpen) {
@@ -17,6 +20,7 @@ export default function AuthModal({ isOpen, onClose }) {
       setStep(1);
       setEmail("");
       setName("");
+      setToken("");
     } else {
       document.body.style.overflow = "unset";
     }
@@ -31,8 +35,16 @@ export default function AuthModal({ isOpen, onClose }) {
     if (step > 1) {
       setStep(step - 1);
     } else {
-      setView(view === "login" ? "register" : "login");
-      setStep(1);
+      if (view === "forgot") {
+        setView("login");
+        setStep(2); // Go back to password step
+      } else if (view === "reset") {
+        setView("forgot");
+        setStep(1);
+      } else {
+        setView(view === "login" ? "register" : "login");
+        setStep(1);
+      }
     }
   };
 
@@ -51,7 +63,7 @@ export default function AuthModal({ isOpen, onClose }) {
       <div className="relative w-full max-w-[450px] min-h-[500px] bg-card shadow-2xl rounded-3xl border border-border-subtle overflow-hidden z-100 flex flex-col animate-in zoom-in-95 duration-200">
         {/* Navigation Header */}
         <div className="absolute top-4 inset-x-4 flex justify-between items-center z-10">
-          {step > 1 || view === "register" ? (
+          {step > 1 || view !== "login" ? (
             <button
               onClick={handleBack}
               className="p-2 rounded-full hover:bg-muted text-muted transition-colors flex items-center gap-1 group"
@@ -83,12 +95,16 @@ export default function AuthModal({ isOpen, onClose }) {
             <h2 className="text-2xl font-semibold text-foreground">
               {view === "login" ? (step === 1 ? "Sign in" : "Welcome") : 
                view === "register" ? (step === 1 ? "Create account" : "Set password") : 
-               "Registration Successful"}
+               view === "forgot" ? "Account recovery" :
+               view === "reset" ? "Reset password" :
+               "Success!"}
             </h2>
             <p className="text-sm text-muted mt-2">
               {view === "login" ? (step === 1 ? "Use your Library Hub Account" : email) :
                view === "register" ? (step === 1 ? "to continue to Library Hub" : email) :
-               "Your account has been created."}
+               view === "forgot" ? "To help keep your account safe, Library Hub wants to make sure it’s really you" :
+               view === "reset" ? (step === 1 ? "Enter the recovery code" : "Create a strong new password") :
+               "Your operation was successful."}
             </p>
           </div>
         </div>
@@ -104,6 +120,7 @@ export default function AuthModal({ isOpen, onClose }) {
                 email={email}
                 setEmail={setEmail}
                 toggleView={toggleView}
+                onForgot={() => { setView("forgot"); setStep(1); }}
               />
             )}
 
@@ -117,6 +134,25 @@ export default function AuthModal({ isOpen, onClose }) {
                 name={name}
                 setName={setName}
                 toggleView={toggleView}
+              />
+            )}
+
+            {view === "forgot" && (
+              <ForgotForm
+                email={email}
+                setEmail={setEmail}
+                onSuccess={() => { setView("reset"); setStep(1); }}
+              />
+            )}
+
+            {view === "reset" && (
+              <ResetForm
+                step={step}
+                setStep={setStep}
+                email={email}
+                token={token}
+                setToken={setToken}
+                onSuccess={() => { setView("login"); setStep(1); }}
               />
             )}
 

@@ -15,7 +15,33 @@ const authService = {
 
   register: async (name, email, password) => {
     try {
-      const response = await api.post("/account/register", { name, email, password });
+      const response = await api.post("/account/register", {
+        name,
+        email,
+        password,
+      });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  forgetPassword: async (email) => {
+    try {
+      const response = await api.post("/account/forgot-password", { email });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  resetPassword: async (email, token, newPassword) => {
+    try {
+      const response = await api.post("/account/reset-password", {
+        email,
+        token,
+        newPassword,
+      });
       return response.data;
     } catch (error) {
       throw error.response?.data || error.message;
