@@ -114,13 +114,13 @@ export default function BookForm({ onSubmit, loading }) {
         required
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <FormInput
-          icon={Hash}
-          placeholder="ISBN"
-          value={formData.isbn}
-          onChange={(e) => setFormData({ ...formData, isbn: e.target.value })}
-        />
+      <FormInput
+        icon={Hash}
+        placeholder="ISBN"
+        value={formData.isbn}
+        onChange={(e) => setFormData({ ...formData, isbn: e.target.value })}
+      />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormInput
           icon={Calendar}
           type="number"

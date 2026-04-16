@@ -3,7 +3,11 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 
 // Services & Context
-import { booksService, categoriesService } from "../services/apiservices";
+import {
+  booksService,
+  categoriesService,
+  wishlistService,
+} from "../services/apiservices";
 import { useAuth } from "../context/useAuth";
 import { useToast } from "../context/ToastContext";
 
@@ -42,8 +46,11 @@ export default function BookDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // ── UI State ──
+  // ── UI & Wishlist State ──
   const [isLiked, setIsLiked] = useState(false);
+  const [wishlistId, setWishlistId] = useState(null);
+  const [isWishlistLoading, setIsWishlistLoading] = useState(false);
+
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -51,8 +58,6 @@ export default function BookDetails() {
 
   // ── Form State ──
   const [editData, setEditData] = useState(EMPTY_EDIT);
-  const [isAddingCategory, setIsAddingCategory] = useState(false);
-  const [newCategoryName, setNewCategoryName] = useState("");
 
   // ── Fetch Book ──
   useEffect(() => {
@@ -76,6 +81,28 @@ export default function BookDetails() {
     };
   }, [id]);
 
+  // ── Fetch Wishlist Status ──
+  useEffect(() => {
+    if (!user || !id) return;
+
+    const checkWishlistStatus = async () => {
+      try {
+        const myWishlist = await wishlistService.getAll();
+        const savedItem = myWishlist.find(
+          (item) => item.bookId === parseInt(id),
+        );
+
+        if (savedItem) {
+          setIsLiked(true);
+          setWishlistId(savedItem.wishlistId);
+        }
+      } catch (err) {
+        console.error("Failed to check wishlist status", err);
+      }
+    };
+    checkWishlistStatus();
+  }, [id, user]);
+
   // ── Fetch Categories (Admin Only) ──
   useEffect(() => {
     if (!isAdmin) return;
@@ -86,6 +113,36 @@ export default function BookDetails() {
   }, [isAdmin]);
 
   // ── Handlers ──
+  const handleToggleWishlist = async () => {
+    if (!user) {
+      toast.error("Please log in to save books to your wishlist.");
+      return;
+    }
+
+    try {
+      setIsWishlistLoading(true);
+
+      if (isLiked) {
+        await wishlistService.delete(wishlistId);
+        setIsLiked(false);
+        setWishlistId(null);
+        toast.success("Removed from wishlist");
+        window.dispatchEvent(new Event("wishlistUpdated"));
+      } else {
+        const response = await wishlistService.postById(id);
+        setIsLiked(true);
+        setWishlistId(response.wishlistId);
+        toast.success("Added to wishlist!");
+        window.dispatchEvent(new Event("wishlistUpdated"));
+      }
+    } catch (err) {
+      toast.error("Failed to update wishlist");
+      console.error(err);
+    } finally {
+      setIsWishlistLoading(false);
+    }
+  };
+
   const handleEditClick = () => {
     setEditData({
       title: book.title,
@@ -96,29 +153,20 @@ export default function BookDetails() {
       totalPages: book.totalPages || "",
       authorNames: book.authorNames || [],
     });
-    setIsAddingCategory(false);
-    setNewCategoryName("");
     setIsEditing(true);
   };
 
   const handleCancel = () => {
     setIsEditing(false);
     setEditData(EMPTY_EDIT);
-    setIsAddingCategory(false);
-    setNewCategoryName("");
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
 
     if (name === "categoryId") {
-      if (value === "new") {
-        setIsAddingCategory(true);
-      } else {
-        setIsAddingCategory(false);
-        const catId = value === "" ? "" : parseInt(value, 10);
-        setEditData((prev) => ({ ...prev, categoryId: catId }));
-      }
+      const catId = value === "" ? "" : parseInt(value, 10);
+      setEditData((prev) => ({ ...prev, categoryId: catId }));
       return;
     }
 
@@ -146,22 +194,12 @@ export default function BookDetails() {
         authorNames: editData.authorNames,
       };
 
-      if (isAddingCategory) {
-        if (!newCategoryName.trim()) {
-          alert("Please select one category.");
-          return;
-        }
-        const newCat = await categoriesService.create({
-          categoryName: newCategoryName.trim(),
-        });
-        payload.categoryId = newCat.categoryId;
-        setCategories((prev) => [...prev, newCat]);
-      }
-
       await booksService.update(id, payload);
       const refreshed = await booksService.getById(id);
       setBook(refreshed);
       handleCancel();
+
+      window.dispatchEvent(new Event("bookCreated"));
       toast.success("Book saved successfully");
     } catch (err) {
       console.error("Error saving book:", err);
@@ -180,7 +218,6 @@ export default function BookDetails() {
       setIsDeleting(true);
       await booksService.delete(id);
 
-      // Broadcast the event so the Home page knows to refresh its list
       window.dispatchEvent(new Event("bookCreated"));
 
       toast.success("Book deleted successfully");
@@ -199,9 +236,11 @@ export default function BookDetails() {
     return <ErrorState message={error} onBack={() => navigate("/")} />;
 
   // ── Derived Values ──
-  const coverUrl = book.isbn
-    ? `https://covers.openlibrary.org/b/isbn/${book.isbn}-L.jpg`
-    : null;
+  const coverUrl =
+    book.imageUrl ||
+    (book.isbn
+      ? `https://covers.openlibrary.org/b/isbn/${book.isbn}-L.jpg`
+      : null);
   const coverColor = book.coverColor || "var(--accent-main)";
 
   // ── JSX ──
@@ -224,9 +263,6 @@ export default function BookDetails() {
           editData={editData}
           categories={categories}
           handleChange={handleChange}
-          isAddingCategory={isAddingCategory}
-          newCategoryName={newCategoryName}
-          setNewCategoryName={setNewCategoryName}
         />
 
         <div className="p-8">
@@ -237,7 +273,8 @@ export default function BookDetails() {
               user={user}
               isEditing={isEditing}
               isLiked={isLiked}
-              setIsLiked={setIsLiked}
+              onToggleLike={handleToggleWishlist}
+              isLoading={isWishlistLoading}
             />
 
             <div className="flex-1 space-y-8 my-auto">

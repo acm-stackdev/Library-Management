@@ -1,3 +1,5 @@
+import FormSelect from "../ui/FormSelect";
+
 export default function BookHeader({
   book,
   coverColor,
@@ -5,69 +7,46 @@ export default function BookHeader({
   editData,
   categories,
   handleChange,
-  isAddingCategory,
-  newCategoryName,
-  setNewCategoryName,
 }) {
+  const selectOptions = categories.map((cat) => ({
+    id: cat.categoryId ?? cat.id,
+    name: cat.categoryName ?? cat.name ?? "Unnamed Category",
+  }));
+
   return (
     <div
-      className="h-40 flex items-end p-8"
+      className="h-40 flex items-end p-8 transition-colors duration-500"
       style={{ backgroundColor: coverColor }}
     >
       {isEditing ? (
-        <div className="w-full space-y-2">
-          {/* Category selector */}
-          <div className="flex flex-wrap gap-2 items-center">
-            <select
+        <div className="w-full space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          {/* Category Dropdown */}
+          <div className="w-64">
+            <FormSelect
               name="categoryId"
-              value={isAddingCategory ? "new" : editData.categoryId}
+              placeholder="Select Category"
+              options={selectOptions}
+              value={editData.categoryId}
               onChange={handleChange}
-              className="bg-card text-foreground text-xs font-bold tracking-widest uppercase p-1.5 rounded-lg border border-border-subtle shadow-sm outline-hidden focus:ring-2 focus:ring-accent/50"
-            >
-              <option value="" disabled>
-                Select Category
-              </option>
-              {categories.map((cat) => (
-                <option
-                  key={cat.categoryId ?? cat.id}
-                  value={cat.categoryId ?? cat.id}
-                  className="bg-card text-foreground"
-                >
-                  {cat.categoryName ?? cat.name ?? "Unnamed Category"}
-                </option>
-              ))}
-              <option value="new" className="bg-card text-accent font-bold">
-                + ADD NEW CATEGORY
-              </option>
-            </select>
-
-            {isAddingCategory && (
-              <input
-                type="text"
-                value={newCategoryName}
-                onChange={(e) => setNewCategoryName(e.target.value)}
-                placeholder="New category name"
-                autoFocus
-                className="bg-white/20 text-white text-xs font-bold p-1.5 rounded border border-white/40 outline-hidden placeholder:text-white/50"
-              />
-            )}
+              className="py-2 px-3 text-xs font-bold tracking-widest uppercase rounded-lg border-white/20 bg-black/20 text-white backdrop-blur-md shadow-sm focus:ring-white/50"
+            />
           </div>
 
-          {/* Title input */}
+          {/* Title Input */}
           <input
             name="title"
             value={editData.title}
             onChange={handleChange}
             placeholder="Book Title"
-            className="w-full bg-transparent text-3xl md:text-4xl font-black text-white tracking-tight border-b-2 border-white/50 outline-hidden focus:border-white"
+            className="w-full bg-transparent text-3xl md:text-4xl font-black text-white tracking-tight border-b-2 border-white/30 outline-none focus:border-white pb-1 transition-colors placeholder:text-white/40"
           />
         </div>
       ) : (
-        <div>
-          <span className="text-xs font-bold tracking-widest uppercase text-white/70">
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <span className="text-xs font-bold tracking-widest uppercase text-white/80 drop-shadow-md">
             {book.categoryName}
           </span>
-          <h2 className="text-3xl md:text-4xl font-black mt-1 text-white tracking-tight">
+          <h2 className="text-3xl md:text-4xl font-black mt-1 text-white tracking-tight drop-shadow-lg">
             {book.title}
           </h2>
         </div>

@@ -32,14 +32,9 @@ export const createApiService = (endpoint) => {
       }
     },
 
-    update: async (id, data) => {
-      try {
-        const response = await api.put(`${endpoint}/${id}`, data);
-        return response.data;
-      } catch (error) {
-        console.error(`Error updating at ${endpoint}/${id}:`, error);
-        throw error;
-      }
+    postById: async (id) => {
+      const response = await api.post(`${endpoint}/${id}`);
+      return response.data;
     },
 
     delete: async (id) => {
@@ -56,3 +51,4 @@ export const createApiService = (endpoint) => {
 
 export const booksService = createApiService("/books");
 export const categoriesService = createApiService("/category");
+export const wishlistService = createApiService("/Wishlist");

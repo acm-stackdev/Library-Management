@@ -6,7 +6,8 @@ export default function BookCover({
   user,
   isEditing,
   isLiked,
-  setIsLiked,
+  onToggleLike,
+  isLoading,
 }) {
   return (
     <div className="w-full md:w-64 shrink-0 space-y-4">
@@ -36,12 +37,16 @@ export default function BookCover({
         {/* Heart / Like Button */}
         {user && !isEditing && (
           <button
-            onClick={() => setIsLiked((v) => !v)}
-            className={`absolute top-4 right-4 p-2.5 rounded-xl backdrop-blur-md shadow-lg transition-all ${
-              isLiked
-                ? "bg-red-500 text-white"
-                : "bg-card/80 text-foreground hover:bg-card"
-            }`}
+            type="button"
+            onClick={onToggleLike}
+            disabled={isLoading}
+            className={`absolute top-4 right-4 p-2.5 rounded-xl backdrop-blur-md shadow-lg transition-all 
+              ${isLoading ? "opacity-50 cursor-wait" : "hover:scale-110"} 
+              ${
+                isLiked
+                  ? "bg-red-500 text-white"
+                  : "bg-card/80 text-foreground hover:bg-card"
+              }`}
           >
             <Heart className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`} />
           </button>

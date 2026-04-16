@@ -1,10 +1,8 @@
 import { Heart } from "lucide-react";
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/useAuth";
 
-export default function BookCard({ book }) {
-  const [isLiked, setIsLiked] = useState(false);
+export default function BookCard({ book, isLiked }) {
   const { user } = useAuth();
 
   const coverUrl = book.isbn
@@ -43,19 +41,13 @@ export default function BookCard({ book }) {
       </Link>
 
       {user && (
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            setIsLiked(!isLiked);
-          }}
+        <div
           className={`absolute top-4 right-4 p-2 rounded-xl backdrop-blur-md transition-all shadow-lg z-10 ${
-            isLiked
-              ? "bg-red-500 text-white"
-              : "bg-black/20 text-white hover:bg-black/40"
+            isLiked ? "bg-red-500 text-white" : "bg-black/40 text-white"
           }`}
         >
           <Heart className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`} />
-        </button>
+        </div>
       )}
     </div>
   );
