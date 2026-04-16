@@ -1,9 +1,11 @@
 const variants = {
-  primary: "bg-accent text-white hover:bg-accent/90 shadow-md hover:shadow-lg",
-  secondary: "bg-muted/10 text-foreground hover:bg-muted/20",
-  outline: "border border-border-subtle text-foreground hover:bg-muted/5",
-  danger: "text-red-500 hover:bg-red-500/10",
-  ghost: "text-muted hover:text-foreground hover:bg-muted/10",
+  primary: "bg-accent text-white hover:opacity-90 shadow-sm",
+  solid: "bg-foreground text-background hover:opacity-90 shadow-sm",
+  secondary:
+    "bg-muted text-muted-foreground hover:bg-muted/80 border border-border-subtle/50",
+  outline: "border border-border-subtle text-foreground hover:bg-muted/50",
+  danger: "bg-red-500/10 text-red-500 hover:bg-red-500/20",
+  ghost: "text-muted-foreground hover:text-foreground hover:bg-muted/50",
 };
 
 const sizes = {
@@ -21,7 +23,14 @@ export default function Button({
   type = "button",
   disabled = false,
   icon: Icon,
+  iconSize,
 }) {
+  const getIconSize = () => {
+    if (iconSize) return iconSize;
+    if (size === "sm") return 18;
+    if (size === "lg") return 26;
+    return 22;
+  };
   return (
     <button
       type={type}
@@ -36,7 +45,9 @@ export default function Button({
         ${className}
       `}
     >
-      {Icon && <Icon size={size === "sm" ? 16 : size === "lg" ? 20 : 18} />}
+      {Icon && (
+        <Icon size={getIconSize()} strokeWidth={2.5} className="shrink-0" />
+      )}
       {children}
     </button>
   );

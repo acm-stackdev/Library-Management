@@ -1,61 +1,58 @@
 import { useState, useMemo } from "react";
 import authService from "../../services/authService";
-import Button from "../Button";
-import { Eye, EyeOff, Check } from "lucide-react";
+import Button from "../ui/Button";
+import FormInput from "../ui/FormInput";
+import AuthError from "../ui/AuthError";
+import AuthRequirements from "../ui/AuthRequirements";
+import { KeyRound, Lock } from "lucide-react";
+import { useToast } from "../../context/ToastContext";
 
-export default function ResetForm({ step, setStep, email, token, setToken, onSuccess }) {
+export default function ResetForm({
+  step,
+  setStep,
+  email,
+  token,
+  setToken,
+  onSuccess,
+}) {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const toast = useToast();
 
-  const requirements = useMemo(() => [
-    { label: "At least 6 characters", met: password.length >= 6 },
-    { label: "At least one uppercase ('A'-'Z')", met: /[A-Z]/.test(password) },
-    { label: "At least one digit ('0'-'9')", met: /[0-9]/.test(password) },
-    { label: "At least one special character", met: /[^A-Za-z0-9]/.test(password) },
-  ], [password]);
+  const requirements = useMemo(
+    () => [
+      { label: "At least 6 characters", met: password.length >= 6 },
+      { label: "One uppercase letter", met: /[A-Z]/.test(password) },
+      { label: "One digit ('0'-'9')", met: /[0-9]/.test(password) },
+      { label: "One special character", met: /[^A-Za-z0-9]/.test(password) },
+    ],
+    [password],
+  );
 
-  const allRequirementsMet = requirements.every(req => req.met);
-
-  const handleNext = (e) => {
-    e.preventDefault();
-    if (token) {
-      setStep(2);
-      setError("");
-    } else {
-      setError("Please enter the recovery token.");
-    }
-  };
+  const allRequirementsMet = requirements.every((req) => req.met);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!allRequirementsMet) {
-      setError("Please meet all password requirements.");
-      return;
+    if (step === 1) {
+      if (!token) return setError("Please enter the code.");
+      return setStep(2);
     }
-    
+
+    if (!allRequirementsMet) return setError("Please meet all requirements.");
+    if (password !== confirmPassword)
+      return setError("Passwords do not match.");
+
     setLoading(true);
-    setError("");
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
-      setLoading(false);
-      return;
-    }
-
     try {
       await authService.resetPassword(email, token, password);
+      toast.success("Password reset successfully!");
       onSuccess();
     } catch (err) {
-      console.error("Reset password error:", err);
-      const errorMessage =
-        typeof err === "string"
-          ? err
-          : err.message || err.error || "Failed to reset password.";
-      setError(errorMessage);
+      setError(typeof err === "string" ? err : "Reset failed.");
     } finally {
       setLoading(false);
     }
@@ -63,115 +60,72 @@ export default function ResetForm({ step, setStep, email, token, setToken, onSuc
 
   return (
     <div className="animate-in slide-in-from-right-4 duration-300 h-full flex flex-col">
-      {step === 1 ? (
-        <form onSubmit={handleNext} className="space-y-6 flex-1 flex flex-col">
-          <div className="flex-1 space-y-6">
-            <div className="space-y-2">
-              <input
+      <form onSubmit={handleSubmit} className="space-y-4 flex-1 flex flex-col">
+        <div className="flex-1 space-y-4">
+          {step === 1 ? (
+            <div className="space-y-4">
+              <FormInput
+                icon={KeyRound}
                 type="text"
                 value={token}
                 onChange={(e) => setToken(e.target.value)}
-                className="w-full px-4 py-3.5 rounded-xl bg-background border border-border-subtle focus:ring-2 focus:ring-accent outline-none transition-all duration-200 text-lg"
                 placeholder="Recovery code"
                 required
                 autoFocus
               />
+              <p className="text-sm text-muted px-1">
+                Enter the 6-digit code sent to <strong>{email}</strong>.
+              </p>
             </div>
-
-            {error && (
-              <div className="text-sm text-red-500 bg-red-500/10 p-3 rounded-lg border border-red-500/20">
-                {error}
+          ) : (
+            <div className="space-y-4">
+              <div className="space-y-1">
+                <FormInput
+                  icon={Lock}
+                  isPassword
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="New Password"
+                  onFocus={() => setIsPasswordFocused(true)}
+                  onBlur={() => setIsPasswordFocused(false)}
+                  togglePassword={() => setShowPassword(!showPassword)}
+                  required
+                  autoFocus
+                />
+                <AuthRequirements
+                  requirements={requirements}
+                  isVisible={
+                    isPasswordFocused ||
+                    (password.length > 0 && !allRequirementsMet)
+                  }
+                />
               </div>
-            )}
-
-            <p className="text-sm text-muted leading-relaxed">
-              We've sent a code to <strong>{email}</strong>. Enter it above to continue resetting your password.
-            </p>
-          </div>
-
-          <div className="flex justify-end pt-8">
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-              className="rounded-xl px-8 font-bold"
-            >
-              Next
-            </Button>
-          </div>
-        </form>
-      ) : (
-        <form onSubmit={handleSubmit} className="space-y-4 flex-1 flex flex-col">
-          <div className="flex-1 space-y-4">
-            <div className="space-y-2 relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3.5 pr-12 rounded-xl bg-background border border-border-subtle focus:ring-2 focus:ring-accent outline-none transition-all duration-200 text-lg"
-                placeholder="New password"
-                required
-                minLength={6}
-                autoFocus
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-muted hover:text-foreground transition-colors"
-              >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
-            </div>
-
-            {/* Password Requirements */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 px-1">
-              {requirements.map((req, i) => (
-                <div key={i} className={`flex items-center gap-2 text-[11px] font-medium transition-colors ${req.met ? "text-green-500" : "text-muted"}`}>
-                  {req.met ? <Check size={12} strokeWidth={3} /> : <div className="w-1.5 h-1.5 rounded-full bg-current opacity-40 ml-1 mr-0.5" />}
-                  {req.label}
-                </div>
-              ))}
-            </div>
-
-            <div className="space-y-2 relative">
-              <input
-                type={showConfirmPassword ? "text" : "password"}
+              <FormInput
+                icon={Lock}
+                type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-4 py-3.5 pr-12 rounded-xl bg-background border border-border-subtle focus:ring-2 focus:ring-accent outline-none transition-all duration-200 text-lg"
-                placeholder="Confirm new password"
+                placeholder="Confirm New Password"
                 required
-                minLength={6}
               />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-muted hover:text-foreground transition-colors"
-              >
-                {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
             </div>
+          )}
+          <AuthError message={error} />
+        </div>
 
-            {error && (
-              <div className="text-sm text-red-500 bg-red-500/10 p-3 rounded-lg border border-red-500/20">
-                {error}
-              </div>
-            )}
-          </div>
-
-          <div className="flex justify-end pt-8">
-            <Button
-              type="submit"
-              disabled={loading || !allRequirementsMet}
-              variant="primary"
-              size="lg"
-              className="rounded-xl px-8 font-bold"
-            >
-              {loading ? "Resetting..." : "Reset Password"}
-            </Button>
-          </div>
-        </form>
-      )}
+        <div className="flex justify-end pt-8">
+          <Button
+            type="submit"
+            isLoading={loading}
+            variant="primary"
+            size="lg"
+            className="rounded-xl px-8"
+          >
+            {step === 1 ? "Next" : "Reset Password"}
+          </Button>
+        </div>
+      </form>
     </div>
   );
 }

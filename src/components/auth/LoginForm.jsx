@@ -1,13 +1,24 @@
 import { useState } from "react";
-import { useAuth } from "../../context/AuthContext";
-import Button from "../Button";
-import { Eye, EyeOff } from "lucide-react";
+import { useAuth } from "../../context/useAuth";
+import Button from "../ui/Button";
+import FormInput from "../ui/FormInput";
+import AuthError from "../ui/AuthError";
+import { Mail, Lock } from "lucide-react";
 
-export default function LoginForm({ step, setStep, onSuccess, email, setEmail, toggleView, onForgot }) {
+export default function LoginForm({
+  step,
+  setStep,
+  onSuccess,
+  email,
+  setEmail,
+  toggleView,
+  onForgot,
+}) {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isEmailUnconfirmed, setIsEmailUnconfirmed] = useState(false);
   const { login } = useAuth();
 
   const handleNext = (e) => {
@@ -29,7 +40,16 @@ export default function LoginForm({ step, setStep, onSuccess, email, setEmail, t
       await login(email, password);
       onSuccess();
     } catch (err) {
-      setError(err || "Login failed. Please check your credentials.");
+      const status = err.response?.status;
+      const data = err.response?.data;
+      if (status === 403 || data?.code === "EMAIL_NOT_CONFIRMED") {
+        setIsEmailUnconfirmed(true);
+        setError(data?.message || "Please confirm your email first.");
+      } else if (status === 401) {
+        setError("Invalid email or password.");
+      } else {
+        setError("Something went wrong. Please try again later.");
+      }
     } finally {
       setLoading(false);
     }
@@ -40,30 +60,18 @@ export default function LoginForm({ step, setStep, onSuccess, email, setEmail, t
       {step === 1 ? (
         <form onSubmit={handleNext} className="space-y-6 flex-1 flex flex-col">
           <div className="flex-1 space-y-6">
-            <div className="space-y-2">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3.5 rounded-xl bg-background border border-border-subtle focus:ring-2 focus:ring-accent outline-none transition-all duration-200 text-lg"
-                placeholder="Email or phone"
-                required
-                autoFocus
-              />
-            </div>
-
-            {error && (
-              <div className="text-sm text-red-500 bg-red-500/10 p-3 rounded-lg border border-red-500/20">
-                {error}
-              </div>
-            )}
-
-            <p className="text-xs text-muted leading-relaxed">
-              Not your computer? Use Guest mode to sign in privately.{" "}
-              <a href="#" className="text-accent font-bold hover:underline">Learn more</a>
-            </p>
+            <FormInput
+              icon={Mail}
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email or phone"
+              required
+              autoFocus
+            />
+            <AuthError message={error} />
           </div>
-          
+
           <div className="flex items-center justify-between pt-8">
             <button
               type="button"
@@ -76,45 +84,35 @@ export default function LoginForm({ step, setStep, onSuccess, email, setEmail, t
               type="submit"
               variant="primary"
               size="lg"
-              className="rounded-xl px-8 font-bold"
+              className="rounded-xl px-8"
             >
               Next
             </Button>
           </div>
         </form>
       ) : (
-        <form onSubmit={handleSubmit} className="space-y-6 flex-1 flex flex-col">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-6 flex-1 flex flex-col"
+        >
           <div className="flex-1 space-y-6">
-            <div className="space-y-2 relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3.5 pr-12 rounded-xl bg-background border border-border-subtle focus:ring-2 focus:ring-accent outline-none transition-all duration-200 text-lg"
-                placeholder="Enter your password"
-                required
-                autoFocus
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-muted hover:text-foreground transition-colors"
-              >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
-            </div>
-
-            {error && (
-              <div className="text-sm text-red-500 bg-red-500/10 p-3 rounded-lg border border-red-500/20">
-                {error}
-              </div>
-            )}
-
+            <FormInput
+              icon={Lock}
+              isPassword
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter password"
+              togglePassword={() => setShowPassword(!showPassword)}
+              required
+              autoFocus
+            />
+            <AuthError message={error} />
             <div className="flex justify-start">
               <button
                 type="button"
                 onClick={onForgot}
-                className="text-accent font-bold text-sm hover:underline underline-offset-4 transition-all"
+                className="text-accent font-bold text-sm hover:underline"
               >
                 Forgot password?
               </button>
@@ -127,7 +125,7 @@ export default function LoginForm({ step, setStep, onSuccess, email, setEmail, t
               disabled={loading}
               variant="primary"
               size="lg"
-              className="rounded-xl px-8 font-bold"
+              className="rounded-xl px-8"
             >
               {loading ? "Signing in..." : "Sign In"}
             </Button>

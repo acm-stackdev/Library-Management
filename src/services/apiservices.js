@@ -21,7 +21,38 @@ export const createApiService = (endpoint) => {
         throw error;
       }
     },
+
+    create: async (data) => {
+      try {
+        const response = await api.post(endpoint, data);
+        return response.data;
+      } catch (error) {
+        console.error(`Error creating at ${endpoint}:`, error);
+        throw error;
+      }
+    },
+
+    update: async (id, data) => {
+      try {
+        const response = await api.put(`${endpoint}/${id}`, data);
+        return response.data;
+      } catch (error) {
+        console.error(`Error updating at ${endpoint}/${id}:`, error);
+        throw error;
+      }
+    },
+
+    delete: async (id) => {
+      try {
+        const response = await api.delete(`${endpoint}/${id}`);
+        return response.data;
+      } catch (error) {
+        console.error(`Error deleting from ${endpoint}/${id}:`, error);
+        throw error;
+      }
+    },
   };
 };
 
 export const booksService = createApiService("/books");
+export const categoriesService = createApiService("/category");

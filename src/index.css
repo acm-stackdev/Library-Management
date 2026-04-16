@@ -1,16 +1,17 @@
 @import "tailwindcss";
 
 @theme {
-  /* Semantic color mapping */
+  /* Semantic color mapping for Tailwind utilities */
   --color-background: var(--bg-main);
   --color-foreground: var(--text-main);
   --color-card: var(--bg-card);
   --color-card-foreground: var(--text-main);
   --color-muted: var(--text-muted);
+  --color-muted-foreground: var(--text-muted-foreground);
   --color-border-subtle: var(--border-main);
   --color-accent: var(--accent-main);
-  --color-success: #10b981; /* emerald-500 */
-  --color-warning: #f59e0b; /* amber-500 */
+  --color-success: var(--success);
+  --color-warning: var(--warning);
 }
 
 html {
@@ -18,29 +19,42 @@ html {
 }
 
 :root {
-  /* Light Mode Colors */
-  --bg-main: #f9fafb; /* gray-50 */
-  --bg-card: #ffffff; /* white */
-  --text-main: #111827; /* gray-900 */
-  --text-muted: #4b5563; /* gray-600 */
-  --border-main: #e5e7eb; /* gray-200 */
-  --accent-main: #2563eb; /* blue-600 */
+  /* Light Mode - Zinc & Indigo Palette */
+  --bg-main: #fafafa; /* zinc-50 - softer than pure white */
+  --bg-card: #ffffff; /* pure white for elevated cards */
+  --bg-muted: #f4f4f5; /* zinc-100 - for badges and soft panels */
+
+  --text-main: #09090b; /* zinc-950 - not quite pitch black */
+  --text-muted: #71717a; /* zinc-500 */
+  --text-muted-foreground: #52525b; /* zinc-600 */
+
+  --border-main: #e4e4e7; /* zinc-200 */
+  --accent-main: #4f46e5; /* indigo-600 - a very modern, premium primary color */
+
   --success: #10b981;
   --warning: #f59e0b;
 
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    sans-serif;
   line-height: 1.5;
   font-weight: 400;
 }
 
 .dark {
-  /* Dark Mode Colors - Adjust these later! */
-  --bg-main: #030712; /* gray-950 */
-  --bg-card: #111827; /* gray-900 */
-  --text-main: #f9fafb; /* gray-50 */
-  --text-muted: #9ca3af; /* gray-400 */
-  --border-main: #1f2937; /* gray-800 */
-  --accent-main: #60a5fa; /* blue-400 */
+  /* Dark Mode - Deep Zinc & Soft Indigo */
+  --bg-main: #09090b; /* zinc-950 */
+  --bg-card: #18181b; /* zinc-900 */
+  --bg-muted: #27272a; /* zinc-800 */
+
+  --text-main: #fafafa; /* zinc-50 */
+  --text-muted: #a1a1aa; /* zinc-400 */
+  --text-muted-foreground: #d4d4d8; /* zinc-300 */
+
+  --border-main: #27272a; /* zinc-800 */
+  --accent-main: #6366f1; /* indigo-500 - slightly brighter for dark mode */
 }
 
 body {
@@ -48,16 +62,30 @@ body {
   background-color: var(--bg-main);
   color: var(--text-main);
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   transition:
-    background-color 0.3s,
-    color 0.3s;
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
+/* Modern text selection highlight */
+::selection {
+  background-color: var(--accent-main);
+  color: #ffffff;
+}
+
+/* ── Custom Animations ── */
 @layer utilities {
   .animate-in {
-    animation-duration: 0.3s;
+    animation-duration: 0.4s; /* slightly slower for elegance */
     animation-fill-mode: forwards;
-    animation-timing-function: ease-out;
+    animation-timing-function: cubic-bezier(
+      0.16,
+      1,
+      0.3,
+      1
+    ); /* ultra-smooth easing */
   }
 
   .fade-in {
@@ -68,31 +96,53 @@ body {
     animation-name: zoomIn95;
   }
 
-  .slide-in-from-right-4 {
-    animation-name: slideInFromRight4;
+  .slide-in-from-right-8 {
+    animation-name: slideInFromRight8;
   }
 
-  .slide-in-from-bottom-2 {
-    animation-name: slideInFromBottom2;
+  .slide-in-from-bottom-4 {
+    animation-name: slideInFromBottom4;
   }
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes zoomIn95 {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  } /* 0.97 is less jarring than 0.95 */
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
-@keyframes slideInFromRight4 {
-  from { opacity: 0; transform: translateX(1rem); }
-  to { opacity: 1; transform: translateX(0); }
+@keyframes slideInFromRight8 {
+  from {
+    opacity: 0;
+    transform: translateX(2rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
-@keyframes slideInFromBottom2 {
-  from { opacity: 0; transform: translateY(0.5rem); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes slideInFromBottom4 {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

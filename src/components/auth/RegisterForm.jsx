@@ -1,7 +1,11 @@
 import { useState, useMemo } from "react";
 import authService from "../../services/authService";
-import Button from "../Button";
-import { Eye, EyeOff, Check } from "lucide-react";
+import Button from "../ui/Button";
+import AuthInput from "../ui/FormInput";
+import AuthError from "../ui/AuthError";
+import AuthRequirements from "../ui/AuthRequirements";
+import { User, Mail, Lock } from "lucide-react";
+import { useToast } from "../../context/ToastContext";
 
 export default function RegisterForm({
   step,
@@ -17,17 +21,23 @@ export default function RegisterForm({
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const toast = useToast();
 
-  const requirements = useMemo(() => [
-    { label: "At least 6 characters", met: password.length >= 6 },
-    { label: "At least one uppercase ('A'-'Z')", met: /[A-Z]/.test(password) },
-    { label: "At least one digit ('0'-'9')", met: /[0-9]/.test(password) },
-    { label: "At least one special character", met: /[^A-Za-z0-9]/.test(password) },
-  ], [password]);
+  // ── Password Requirement Logic ──
+  const requirements = useMemo(
+    () => [
+      { label: "At least 6 characters", met: password.length >= 6 },
+      { label: "One uppercase letter", met: /[A-Z]/.test(password) },
+      { label: "One digit ('0'-'9')", met: /[0-9]/.test(password) },
+      { label: "One special character", met: /[^A-Za-z0-9]/.test(password) },
+    ],
+    [password],
+  );
 
-  const allRequirementsMet = requirements.every(req => req.met);
+  const allRequirementsMet = requirements.every((req) => req.met);
 
   const handleNext = (e) => {
     e.preventDefault();
@@ -45,26 +55,25 @@ export default function RegisterForm({
       setError("Please meet all password requirements.");
       return;
     }
-    
-    setLoading(true);
-    setError("");
-
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
-      setLoading(false);
       return;
     }
 
+    setLoading(true);
+    setError("");
+
     try {
       await authService.register(name, email, password);
+      toast.success(
+        "Registration successful! Please check your email for verification.",
+      );
       onRegisterSuccess();
     } catch (err) {
-      console.error("Registration error:", err);
       const errorMessage =
-        typeof err === "string"
-          ? err
-          : err.message || err.error || "Registration failed. Please try again.";
+        typeof err === "string" ? err : "Registration failed.";
       setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -75,33 +84,24 @@ export default function RegisterForm({
       {step === 1 ? (
         <form onSubmit={handleNext} className="space-y-4 flex-1 flex flex-col">
           <div className="flex-1 space-y-4">
-            <div className="space-y-2">
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-3.5 rounded-xl bg-background border border-border-subtle focus:ring-2 focus:ring-accent outline-none transition-all duration-200 text-lg"
-                placeholder="Name"
-                required
-                autoFocus
-              />
-            </div>
-            <div className="space-y-2">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3.5 rounded-xl bg-background border border-border-subtle focus:ring-2 focus:ring-accent outline-none transition-all duration-200 text-lg"
-                placeholder="Email address"
-                required
-              />
-            </div>
-
-            {error && (
-              <div className="text-sm text-red-500 bg-red-500/10 p-3 rounded-lg border border-red-500/20">
-                {error}
-              </div>
-            )}
+            <AuthInput
+              icon={User}
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Full Name"
+              required
+              autoFocus
+            />
+            <AuthInput
+              icon={Mail}
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email address"
+              required
+            />
+            <AuthError message={error} />
           </div>
 
           <div className="flex items-center justify-between pt-8">
@@ -116,69 +116,55 @@ export default function RegisterForm({
               type="submit"
               variant="primary"
               size="lg"
-              className="rounded-xl px-8 font-bold"
+              className="rounded-xl px-8"
             >
               Next
             </Button>
           </div>
         </form>
       ) : (
-        <form onSubmit={handleSubmit} className="space-y-4 flex-1 flex flex-col">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-4 flex-1 flex flex-col"
+        >
           <div className="flex-1 space-y-4">
-            <div className="space-y-2 relative">
-              <input
+            <div className="space-y-1">
+              <AuthInput
+                icon={Lock}
+                isPassword
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3.5 pr-12 rounded-xl bg-background border border-border-subtle focus:ring-2 focus:ring-accent outline-none transition-all duration-200 text-lg"
-                placeholder="Password"
+                onFocus={() => setIsPasswordFocused(true)}
+                onBlur={() => setIsPasswordFocused(false)}
+                placeholder="Create Password"
+                togglePassword={() => setShowPassword(!showPassword)}
                 required
-                minLength={6}
                 autoFocus
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-muted hover:text-foreground transition-colors"
-              >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
-            </div>
-
-            {/* Password Requirements */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 px-1">
-              {requirements.map((req, i) => (
-                <div key={i} className={`flex items-center gap-2 text-[11px] font-medium transition-colors ${req.met ? "text-green-500" : "text-muted"}`}>
-                  {req.met ? <Check size={12} strokeWidth={3} /> : <div className="w-1.5 h-1.5 rounded-full bg-current opacity-40 ml-1 mr-0.5" />}
-                  {req.label}
-                </div>
-              ))}
-            </div>
-
-            <div className="space-y-2 relative">
-              <input
-                type={showConfirmPassword ? "text" : "password"}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-4 py-3.5 pr-12 rounded-xl bg-background border border-border-subtle focus:ring-2 focus:ring-accent outline-none transition-all duration-200 text-lg"
-                placeholder="Confirm password"
-                required
-                minLength={6}
+              <AuthRequirements
+                requirements={requirements}
+                isVisible={
+                  isPasswordFocused ||
+                  (password.length > 0 && !allRequirementsMet)
+                }
               />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-muted hover:text-foreground transition-colors"
-              >
-                {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
             </div>
 
-            {error && (
-              <div className="text-sm text-red-500 bg-red-500/10 p-3 rounded-lg border border-red-500/20">
-                {error}
-              </div>
-            )}
+            <AuthInput
+              icon={Lock}
+              isPassword
+              type={showConfirmPassword ? "text" : "password"}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Confirm password"
+              togglePassword={() =>
+                setShowConfirmPassword(!showConfirmPassword)
+              }
+              required
+            />
+
+            <AuthError message={error} />
           </div>
 
           <div className="flex justify-end pt-8">
@@ -187,9 +173,9 @@ export default function RegisterForm({
               disabled={loading || !allRequirementsMet}
               variant="primary"
               size="lg"
-              className="rounded-xl px-8 font-bold"
+              className="rounded-xl px-8"
             >
-              {loading ? "Creating account..." : "Register"}
+              {loading ? "Creating..." : "Register"}
             </Button>
           </div>
         </form>

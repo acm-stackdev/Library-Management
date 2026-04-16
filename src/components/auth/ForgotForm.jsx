@@ -1,10 +1,15 @@
 import { useState } from "react";
 import authService from "../../services/authService";
-import Button from "../Button";
+import Button from "../ui/Button";
+import FormInput from "../ui/FormInput";
+import AuthError from "../ui/AuthError";
+import { Mail } from "lucide-react";
+import { useToast } from "../../context/ToastContext";
 
 export default function ForgotForm({ email, setEmail, onSuccess }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const toast = useToast();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -13,14 +18,10 @@ export default function ForgotForm({ email, setEmail, onSuccess }) {
 
     try {
       await authService.forgetPassword(email);
+      toast.success("Recovery code sent to your email!");
       onSuccess();
     } catch (err) {
-      console.error("Forgot password error:", err);
-      const errorMessage =
-        typeof err === "string"
-          ? err
-          : err.message || err.error || "Failed to send reset code.";
-      setError(errorMessage);
+      setError(typeof err === "string" ? err : "Failed to send code.");
     } finally {
       setLoading(false);
     }
@@ -30,38 +31,32 @@ export default function ForgotForm({ email, setEmail, onSuccess }) {
     <div className="animate-in slide-in-from-right-4 duration-300 h-full flex flex-col">
       <form onSubmit={handleSubmit} className="space-y-6 flex-1 flex flex-col">
         <div className="flex-1 space-y-6">
-          <div className="space-y-2">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3.5 rounded-xl bg-background border border-border-subtle focus:ring-2 focus:ring-accent outline-none transition-all duration-200 text-lg"
-              placeholder="Enter your email"
-              required
-              autoFocus
-            />
-          </div>
+          <FormInput
+            icon={Mail}
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter your email"
+            required
+            autoFocus
+          />
+          <AuthError message={error} />
 
-          {error && (
-            <div className="text-sm text-red-500 bg-red-500/10 p-3 rounded-lg border border-red-500/20">
-              {error}
-            </div>
-          )}
-
-          <p className="text-sm text-muted leading-relaxed">
-            Enter the email address associated with your account and we'll send you a recovery code to reset your password.
+          <p className="text-sm text-muted leading-relaxed px-1">
+            We'll send a recovery code to this email so you can reset your
+            password safely.
           </p>
         </div>
 
         <div className="flex justify-end pt-8">
           <Button
             type="submit"
-            disabled={loading}
+            isLoading={loading}
             variant="primary"
             size="lg"
-            className="rounded-xl px-8 font-bold"
+            className="rounded-xl px-8"
           >
-            {loading ? "Sending..." : "Next"}
+            Next
           </Button>
         </div>
       </form>
