@@ -3,7 +3,13 @@ import Header from "./components/layout/Header";
 import Home from "./pages/Home";
 import BookDetails from "./pages/BookDetails";
 import NotFound from "./pages/NotFound";
-
+import AdminLayout from "./components/layout/AdminLayout";
+import AdminOverview from "./pages/admin/AdminOverview";
+import UserManagement from "./pages/admin/UserManagement";
+import RoleManagement from "./pages/admin/RoleManagement";
+import CategoryManagement from "./pages/admin/CategoryManagement";
+import SubscriptionManagement from "./pages/admin/SubscriptionManagement";
+import BookLoanManagement from "./pages/admin/BookLoanManagement";
 function App() {
   return (
     <Router>
@@ -13,6 +19,17 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/book/:id" element={<BookDetails />} />
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<AdminOverview />} />
+              <Route path="users" element={<UserManagement />} />
+              <Route path="roles" element={<RoleManagement />} />
+              <Route path="bookloans" element={<BookLoanManagement />} />
+              <Route path="categories" element={<CategoryManagement />} />
+              <Route
+                path="subscriptions"
+                element={<SubscriptionManagement />}
+              />
+            </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>

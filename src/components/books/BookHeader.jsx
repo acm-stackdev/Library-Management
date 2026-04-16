@@ -1,4 +1,5 @@
-import FormSelect from "../ui/FormSelect";
+import FormDropdown from "../ui/FormDropdown";
+import { Tag } from "lucide-react";
 
 export default function BookHeader({
   book,
@@ -15,20 +16,23 @@ export default function BookHeader({
 
   return (
     <div
-      className="h-40 flex items-end p-8 transition-colors duration-500"
+      className="h-48 flex items-end p-8 transition-colors duration-500"
       style={{ backgroundColor: coverColor }}
     >
       {isEditing ? (
-        <div className="w-full space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
-          {/* Category Dropdown */}
+        <div className="w-full space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          {/* ── Category Dropdown ── */}
           <div className="w-64">
-            <FormSelect
-              name="categoryId"
+            <FormDropdown
+              size="sm"
+              icon={Tag}
               placeholder="Select Category"
               options={selectOptions}
               value={editData.categoryId}
-              onChange={handleChange}
-              className="py-2 px-3 text-xs font-bold tracking-widest uppercase rounded-lg border-white/20 bg-black/20 text-white backdrop-blur-md shadow-sm focus:ring-white/50"
+              onChange={(val) =>
+                handleChange({ target: { name: "categoryId", value: val } })
+              }
+              className="bg-black/20 text-white backdrop-blur-md border-white/20 shadow-lg z-10"
             />
           </div>
 
@@ -42,11 +46,11 @@ export default function BookHeader({
           />
         </div>
       ) : (
-        <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <span className="text-xs font-bold tracking-widest uppercase text-white/80 drop-shadow-md">
-            {book.categoryName}
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 pb-1">
+          <span className="text-xs font-black tracking-widest uppercase text-white/70 bg-white/10 px-2 py-1 rounded-md backdrop-blur-sm">
+            {book.categoryName || "Uncategorized"}
           </span>
-          <h2 className="text-3xl md:text-4xl font-black mt-1 text-white tracking-tight drop-shadow-lg">
+          <h2 className="text-3xl md:text-4xl font-black mt-2 text-white tracking-tight drop-shadow-lg">
             {book.title}
           </h2>
         </div>

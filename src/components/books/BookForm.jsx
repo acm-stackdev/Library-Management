@@ -1,6 +1,4 @@
 import { useState, useEffect } from "react";
-import Button from "../ui/Button";
-import FormInput from "../ui/FormInput";
 import {
   BookText,
   User,
@@ -10,8 +8,14 @@ import {
   Calendar,
   FileText,
 } from "lucide-react";
-import FormSelect from "../ui/FormSelect";
+
+// Services & Context
 import { categoriesService } from "../../services/apiservices";
+
+// UI Components
+import Button from "../ui/Button";
+import FormInput from "../ui/FormInput";
+import FormDropdown from "../ui/FormDropdown";
 import FormError from "../ui/FormError";
 
 export default function BookForm({ onSubmit, loading }) {
@@ -31,8 +35,12 @@ export default function BookForm({ onSubmit, loading }) {
     const loadCategories = async () => {
       try {
         const data = await categoriesService.getAll();
-        console.log("MY CATEGORIES FROM API:", data);
-        setCategories(data);
+        // Ensure data is in the {id, name} format FormDropdown expects
+        const mappedCategories = data.map((c) => ({
+          id: c.categoryId,
+          name: c.name,
+        }));
+        setCategories(mappedCategories);
       } catch (err) {
         console.error("Could not load categories", err);
       }
@@ -43,6 +51,7 @@ export default function BookForm({ onSubmit, loading }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     setError("");
+
     const forceNum = (val) => {
       const parsed = parseInt(val, 10);
       return isNaN(parsed) ? 0 : parsed;
@@ -64,9 +73,9 @@ export default function BookForm({ onSubmit, loading }) {
     };
 
     // Validation
-    if (payload.categoryId === 0) {
+    if (!payload.categoryId || payload.categoryId === 0) {
       setError("Please select a valid category.");
-      return; // Stop execution
+      return;
     }
 
     if (payload.authorNames.length === 0) {
@@ -88,18 +97,16 @@ export default function BookForm({ onSubmit, loading }) {
           onChange={(e) => setFormData({ ...formData, title: e.target.value })}
           required
         />
-        <FormSelect
+
+        {/* Category Dropdown */}
+        <FormDropdown
           icon={Tag}
           placeholder="Category"
-          options={categories.map((c) => ({
-            id: c.categoryId,
-            name: c.name,
-          }))}
+          options={categories}
           value={formData.categoryId}
-          onChange={(e) =>
-            setFormData({ ...formData, categoryId: e.target.value })
-          }
-          required
+          // 🔥 Note: Headless UI passes the value directly, not 'e'
+          onChange={(val) => setFormData({ ...formData, categoryId: val })}
+          size="md" // Keep it large for the form
         />
       </div>
 
@@ -120,6 +127,7 @@ export default function BookForm({ onSubmit, loading }) {
         value={formData.isbn}
         onChange={(e) => setFormData({ ...formData, isbn: e.target.value })}
       />
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormInput
           icon={Calendar}
@@ -151,16 +159,15 @@ export default function BookForm({ onSubmit, loading }) {
         }
       />
 
-      {/* Render the error if it exists */}
       {error && <FormError message={error} />}
 
       <Button
         type="submit"
         variant="primary"
         className="w-full rounded-xl py-4 font-bold"
-        isLoading={loading}
+        disabled={loading}
       >
-        Create Book
+        {loading ? "Creating..." : "Create Book"}
       </Button>
     </form>
   );

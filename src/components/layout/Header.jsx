@@ -1,4 +1,4 @@
-import { Sun, Moon, LogOut, User, Plus } from "lucide-react";
+import { Sun, Moon, LogOut, User, Plus, ShieldCheck } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/useAuth";
@@ -120,6 +120,28 @@ export default function Header() {
                         {user.roles?.[0] || "Member"}
                       </p>
                     </div>
+                    {isAdmin && (
+                      <div className="p-2">
+                        <button
+                          onClick={() => navigate("/admin")}
+                          className="w-full flex items-center gap-3 px-3 py-2 text-sm text-accent hover:bg-accent/10 rounded-xl transition-colors font-medium"
+                        >
+                          <ShieldCheck className="w-4 h-4" />
+                          Admin Panel
+                        </button>
+                      </div>
+                    )}
+                    {!isAdmin && (
+                      <div className="p-2">
+                        <button
+                          onClick={() => navigate("/profile")}
+                          className="w-full flex items-center gap-3 px-3 py-2 text-sm text-accent hover:bg-accent/10 rounded-xl transition-colors font-medium"
+                        >
+                          <User className="w-4 h-4" />
+                          Profile
+                        </button>
+                      </div>
+                    )}
                     <div className="p-2">
                       <button
                         onClick={handleLogout}
