@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useAuth } from "../../context/useAuth";
 import Button from "../ui/Button";
 import FormInput from "../ui/FormInput";
-import AuthError from "../ui/AuthError";
+import FormError from "../ui/FormError";
 import { Mail, Lock } from "lucide-react";
 
 export default function LoginForm({
@@ -69,7 +69,7 @@ export default function LoginForm({
               required
               autoFocus
             />
-            <AuthError message={error} />
+            <FormError message={error} />
           </div>
 
           <div className="flex items-center justify-between pt-8">
@@ -107,7 +107,7 @@ export default function LoginForm({
               required
               autoFocus
             />
-            <AuthError message={error} />
+            <FormError message={error} />
             <div className="flex justify-start">
               <button
                 type="button"

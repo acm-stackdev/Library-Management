@@ -29,7 +29,11 @@ export default function Home() {
 
   useEffect(() => {
     fetchBooks();
-  }, [fetchBooks]);
+    window.addEventListener("bookCreated", fetchBooks);
+    return () => {
+      window.removeEventListener("bookCreated", fetchBooks);
+    };
+  }, []);
 
   const filteredBooks = useMemo(() => {
     if (!searchQuery.trim()) return books;

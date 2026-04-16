@@ -1,8 +1,8 @@
 import { useState, useMemo } from "react";
 import authService from "../../services/authService";
 import Button from "../ui/Button";
-import AuthInput from "../ui/FormInput";
-import AuthError from "../ui/AuthError";
+import FormInput from "../ui/FormInput";
+import FormError from "../ui/FormError";
 import AuthRequirements from "../ui/AuthRequirements";
 import { User, Mail, Lock } from "lucide-react";
 import { useToast } from "../../context/ToastContext";
@@ -84,7 +84,7 @@ export default function RegisterForm({
       {step === 1 ? (
         <form onSubmit={handleNext} className="space-y-4 flex-1 flex flex-col">
           <div className="flex-1 space-y-4">
-            <AuthInput
+            <FormInput
               icon={User}
               type="text"
               value={name}
@@ -93,7 +93,7 @@ export default function RegisterForm({
               required
               autoFocus
             />
-            <AuthInput
+            <FormInput
               icon={Mail}
               type="email"
               value={email}
@@ -101,7 +101,7 @@ export default function RegisterForm({
               placeholder="Email address"
               required
             />
-            <AuthError message={error} />
+            <FormError message={error} />
           </div>
 
           <div className="flex items-center justify-between pt-8">
@@ -129,7 +129,7 @@ export default function RegisterForm({
         >
           <div className="flex-1 space-y-4">
             <div className="space-y-1">
-              <AuthInput
+              <FormInput
                 icon={Lock}
                 isPassword
                 type={showPassword ? "text" : "password"}
@@ -151,7 +151,7 @@ export default function RegisterForm({
               />
             </div>
 
-            <AuthInput
+            <FormInput
               icon={Lock}
               isPassword
               type={showConfirmPassword ? "text" : "password"}
@@ -164,7 +164,7 @@ export default function RegisterForm({
               required
             />
 
-            <AuthError message={error} />
+            <FormError message={error} />
           </div>
 
           <div className="flex justify-end pt-8">

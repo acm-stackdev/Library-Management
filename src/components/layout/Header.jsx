@@ -1,8 +1,10 @@
-import { Sun, Moon, LogOut, User } from "lucide-react";
+import { Sun, Moon, LogOut, User, Plus } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/useAuth";
+import { useToast } from "../../context/ToastContext";
 import AuthModal from "./AuthModal";
+import BookModal from "./BookModal";
 import Button from "../ui/Button";
 
 export default function Header() {
@@ -10,10 +12,13 @@ export default function Header() {
     return localStorage.getItem("theme") === "dark";
   });
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isBookModalOpen, setIsBookModalOpen] = useState(false);
   const { user, logout } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const toast = useToast();
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
+  const isAdmin = user?.roles?.includes("Admin");
 
   useEffect(() => {
     if (isDarkMode) {
@@ -40,6 +45,7 @@ export default function Header() {
   const handleLogout = () => {
     logout();
     setIsDropdownOpen(false);
+    toast.info("Logged out successfully");
     navigate("/");
   };
 
@@ -69,6 +75,17 @@ export default function Header() {
           </Link>
 
           <div className="flex items-center gap-2 sm:gap-4">
+            {/* Admin Only Add Book Button */}
+            {user && isAdmin && (
+              <Button
+                onClick={() => setIsBookModalOpen(true)}
+                variant="primary"
+                icon={Plus}
+                className="hidden sm:flex rounded-full px-5 h-10 font-bold"
+              >
+                Add Book
+              </Button>
+            )}
             {/* Dark Mode Toggle */}
             <Button
               onClick={toggleTheme}
@@ -133,6 +150,10 @@ export default function Header() {
       </header>
 
       <AuthModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
+      <BookModal
+        isOpen={isBookModalOpen}
+        onClose={() => setIsBookModalOpen(false)}
+      />
     </>
   );
 }

@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import authService from "../../services/authService";
 import Button from "../ui/Button";
 import FormInput from "../ui/FormInput";
-import AuthError from "../ui/AuthError";
+import FormError from "../ui/FormError";
 import AuthRequirements from "../ui/AuthRequirements";
 import { KeyRound, Lock } from "lucide-react";
 import { useToast } from "../../context/ToastContext";
@@ -111,7 +111,7 @@ export default function ResetForm({
               />
             </div>
           )}
-          <AuthError message={error} />
+          <FormError message={error} />
         </div>
 
         <div className="flex justify-end pt-8">

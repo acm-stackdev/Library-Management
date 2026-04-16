@@ -10,6 +10,7 @@ import { useToast } from "../context/ToastContext";
 // UI Components
 import LoadingState from "../components/ui/LoadingState";
 import ErrorState from "../components/ui/ErrorState";
+import ConfirmModal from "../components/ui/ConfirmModal";
 
 // Feature Components
 import BookHeader from "../components/books/BookHeader";
@@ -45,6 +46,7 @@ export default function BookDetails() {
   const [isLiked, setIsLiked] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   // ── Form State ──
@@ -146,7 +148,7 @@ export default function BookDetails() {
 
       if (isAddingCategory) {
         if (!newCategoryName.trim()) {
-          alert("Please enter a category name or select an existing one.");
+          alert("Please select one category.");
           return;
         }
         const newCat = await categoriesService.create({
@@ -169,16 +171,25 @@ export default function BookDetails() {
     }
   };
 
-  const handleDelete = async () => {
-    if (!window.confirm("Are you sure you want to delete this book?")) return;
+  const handleDelete = () => {
+    setIsDeleteModalOpen(true);
+  };
+
+  const executeDelete = async () => {
     try {
       setIsDeleting(true);
       await booksService.delete(id);
+
+      // Broadcast the event so the Home page knows to refresh its list
+      window.dispatchEvent(new Event("bookCreated"));
+
+      toast.success("Book deleted successfully");
       navigate("/");
     } catch (err) {
       console.error("Error deleting book:", err);
       toast.error("Failed to delete book");
       setIsDeleting(false);
+      setIsDeleteModalOpen(false);
     }
   };
 
@@ -255,6 +266,15 @@ export default function BookDetails() {
                   onDelete={handleDelete}
                 />
               )}
+
+              <ConfirmModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={executeDelete}
+                title="Delete Book"
+                message={`Are you sure you want to permanently delete "${book.title}"? This action cannot be undone.`}
+                loading={isDeleting}
+              />
             </div>
           </div>
         </div>

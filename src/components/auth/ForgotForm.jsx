@@ -2,7 +2,7 @@ import { useState } from "react";
 import authService from "../../services/authService";
 import Button from "../ui/Button";
 import FormInput from "../ui/FormInput";
-import AuthError from "../ui/AuthError";
+import FormError from "../ui/FormError";
 import { Mail } from "lucide-react";
 import { useToast } from "../../context/ToastContext";
 
@@ -40,7 +40,7 @@ export default function ForgotForm({ email, setEmail, onSuccess }) {
             required
             autoFocus
           />
-          <AuthError message={error} />
+          <FormError message={error} />
 
           <p className="text-sm text-muted leading-relaxed px-1">
             We'll send a recovery code to this email so you can reset your
