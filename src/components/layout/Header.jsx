@@ -72,6 +72,9 @@ export default function Header() {
             <h1 className="text-xl font-bold text-foreground tracking-tight">
               Library Hub
             </h1>
+            <span className="w-fit px-1.5 py-0.5 rounded-md bg-accent/10 text-accent border border-accent/20 text-[9px] font-black uppercase tracking-[0.15em] leading-none">
+              Beta
+            </span>
           </Link>
 
           <div className="flex items-center gap-2 sm:gap-4">

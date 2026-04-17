@@ -10,6 +10,11 @@ import RoleManagement from "./pages/admin/RoleManagement";
 import CategoryManagement from "./pages/admin/CategoryManagement";
 import SubscriptionManagement from "./pages/admin/SubscriptionManagement";
 import BookLoanManagement from "./pages/admin/BookLoanManagement";
+import UserLayout from "./components/layout/UserLayout";
+import UserProfile from "./pages/user/UserProfile";
+import UserWishlist from "./pages/user/UserWishlist";
+import UserLoans from "./pages/user/UserLoans";
+import AuthorManagement from "./pages/admin/AuthorManagement";
 function App() {
   return (
     <Router>
@@ -22,6 +27,7 @@ function App() {
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminOverview />} />
               <Route path="users" element={<UserManagement />} />
+              <Route path="authors" element={<AuthorManagement />} />
               <Route path="roles" element={<RoleManagement />} />
               <Route path="bookloans" element={<BookLoanManagement />} />
               <Route path="categories" element={<CategoryManagement />} />
@@ -29,6 +35,11 @@ function App() {
                 path="subscriptions"
                 element={<SubscriptionManagement />}
               />
+            </Route>
+            <Route path="/profile" element={<UserLayout />}>
+              <Route index element={<UserProfile />} />
+              <Route path="wishlist" element={<UserWishlist />} />
+              <Route path="loans" element={<UserLoans />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

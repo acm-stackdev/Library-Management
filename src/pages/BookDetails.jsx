@@ -7,6 +7,7 @@ import {
   booksService,
   categoriesService,
   wishlistService,
+  borrowService,
 } from "../services/apiservices";
 import { useAuth } from "../context/useAuth";
 import { useToast } from "../context/ToastContext";
@@ -21,6 +22,7 @@ import BookHeader from "../components/books/BookHeader";
 import BookCover from "../components/books/BookCover";
 import BookDescription from "../components/books/BookDescription";
 import BookMetadataForm from "../components/books/BookMetadataForm";
+import BookUserActions from "../components/books/BookUserActions";
 import BookAdminActions from "../components/books/BookAdminActions";
 
 const EMPTY_EDIT = {
@@ -43,6 +45,7 @@ export default function BookDetails() {
   // ── Data State ──
   const [book, setBook] = useState(null);
   const [categories, setCategories] = useState([]);
+  const [isBorrowing, setIsBorrowing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -140,6 +143,30 @@ export default function BookDetails() {
       console.error(err);
     } finally {
       setIsWishlistLoading(false);
+    }
+  };
+
+  // ── The Borrow Logic ──
+  const handleBorrow = async () => {
+    if (!user) {
+      toast.error("Please log in to borrow books.");
+      return;
+    }
+
+    try {
+      setIsBorrowing(true);
+      await borrowService.borrowBook(id);
+
+      toast.success("Success! You've borrowed this book.");
+    } catch (err) {
+      const errorMessage =
+        err.response?.data?.message ||
+        (typeof err.response?.data === "string" ? err.response.data : null) ||
+        "Unable to borrow book.";
+
+      toast.error(errorMessage);
+    } finally {
+      setIsBorrowing(false);
     }
   };
 
@@ -292,7 +319,7 @@ export default function BookDetails() {
                 handleChange={handleChange}
               />
 
-              {isAdmin && (
+              {isAdmin ? (
                 <BookAdminActions
                   isEditing={isEditing}
                   isSaving={isSaving}
@@ -301,6 +328,11 @@ export default function BookDetails() {
                   onCancel={handleCancel}
                   onEdit={handleEditClick}
                   onDelete={handleDelete}
+                />
+              ) : (
+                <BookUserActions
+                  onBorrow={handleBorrow}
+                  loading={isBorrowing}
                 />
               )}
 

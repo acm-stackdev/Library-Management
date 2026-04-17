@@ -8,11 +8,13 @@ import {
   ArrowLeftRight,
   CreditCard,
   Menu,
+  UserPlus,
 } from "lucide-react";
 
 const NAV_LINKS = [
   { name: "Overview", path: "/admin", icon: LayoutDashboard, end: true },
   { name: "User Management", path: "/admin/users", icon: Users },
+  { name: "Author Management", path: "/admin/authors", icon: UserPlus },
   { name: "Role & Security", path: "/admin/roles", icon: ShieldCheck },
   { name: "Catalog Settings", path: "/admin/categories", icon: Library },
   { name: "Book Loans", path: "/admin/bookloans", icon: ArrowLeftRight },

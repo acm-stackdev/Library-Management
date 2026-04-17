@@ -1,92 +1,98 @@
 import { useState, useEffect } from "react";
 import {
-  Library,
+  Users,
   Plus,
   Trash2,
+  Search,
   Edit2,
   Check,
   X,
-  Search,
-  BookCopy,
-  Tag,
+  UserPlus,
 } from "lucide-react";
-import { categoriesService } from "../../services/apiservices";
+
+import { authorsService } from "../../services/apiservices";
 import { useToast } from "../../context/ToastContext";
 import Button from "../../components/ui/Button";
 import LoadingState from "../../components/ui/LoadingState";
 import ConfirmModal from "../../components/ui/ConfirmModal";
 
-export default function CategoryManagement() {
-  const [categories, setCategories] = useState([]);
+export default function AuthorManagement() {
+  const [authors, setAuthors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [newCategoryName, setNewCategoryName] = useState("");
+  const [newAuthorName, setNewAuthorName] = useState("");
+  const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [editName, setEditName] = useState("");
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [categoryToDelete, setCategoryToDelete] = useState(null);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [deleteModal, setDeleteModal] = useState({
+    isOpen: false,
+    author: null,
+  });
 
   const toast = useToast();
 
-  const fetchCategories = async () => {
+  const fetchAuthors = async () => {
     try {
       setLoading(true);
-      const data = await categoriesService.getAll();
-      setCategories(data);
+      const data = await authorsService.getAll();
+      setAuthors(data);
     } catch (error) {
-      toast.error("Failed to load categories");
+      toast.error("Failed to sync author database");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchCategories();
+    fetchAuthors();
   }, []);
 
-  const handleCreate = async (e) => {
+  const handleAdd = async (e) => {
     e.preventDefault();
-    if (!newCategoryName.trim()) return;
+    if (!newAuthorName.trim()) return;
     try {
-      await categoriesService.create({ name: newCategoryName });
-      toast.success(`Category "${newCategoryName}" added`);
-      setNewCategoryName("");
-      fetchCategories();
-    } catch (error) {
-      toast.error("Failed to create category");
+      setIsAdding(true);
+      await authorsService.create({ name: newAuthorName });
+      toast.success(`"${newAuthorName}" added to system`);
+      setNewAuthorName("");
+      fetchAuthors();
+    } catch (err) {
+      toast.error("Could not create author");
+    } finally {
+      setIsAdding(false);
     }
   };
 
   const handleUpdate = async (id) => {
     if (!editName.trim()) return;
     try {
-      await categoriesService.update(id, { categoryId: id, name: editName });
-      toast.success("Category renamed");
+      setIsUpdating(true);
+      await authorsService.update(id, { authorId: id, name: editName });
+      toast.success("Author renamed successfully");
       setEditingId(null);
-      fetchCategories();
-    } catch (error) {
+      fetchAuthors();
+    } catch (err) {
       toast.error("Update failed");
+    } finally {
+      setIsUpdating(false);
     }
   };
 
   const handleDelete = async () => {
     try {
-      await categoriesService.delete(categoryToDelete.categoryId);
-      toast.success("Category removed");
-      setCategories(
-        categories.filter((c) => c.categoryId !== categoryToDelete.categoryId),
-      );
-    } catch (error) {
-      toast.error(
-        "Cannot delete category; it may be linked to existing books.",
-      );
+      await authorsService.delete(deleteModal.author.authorId);
+      toast.success("Author removed from catalog");
+      fetchAuthors();
+    } catch (err) {
+      toast.error("Delete restricted: Author likely has active books.");
     } finally {
-      setIsDeleteModalOpen(false);
+      setDeleteModal({ isOpen: false, author: null });
     }
   };
 
-  const filteredCategories = categories.filter((c) =>
-    c.name.toLowerCase().includes(searchQuery.toLowerCase()),
+  const filtered = authors.filter((a) =>
+    a.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   if (loading) return <LoadingState />;
@@ -96,34 +102,34 @@ export default function CategoryManagement() {
       {/* ── Page Header ── */}
       <div>
         <h1 className="text-2xl font-black tracking-tight flex items-center gap-2">
-          <Tag className="text-accent" size={22} />
-          Catalog Settings
+          <UserPlus className="text-accent" size={22} />
+          Author Management
         </h1>
         <p className="text-muted-foreground text-sm mt-1">
-          Organize your library by managing book categories.
+          Manage the author database
         </p>
       </div>
 
       {/* ── Two Column Layout ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* ── Left: Add Category ── */}
+        {/* ── Left: Add Author ── */}
         <div className="lg:col-span-1">
           <div className="bg-card border border-border-subtle rounded-3xl p-6 shadow-sm sticky top-6">
             <h2 className="text-sm font-black uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
-              <Library size={14} className="text-accent" />
-              New Category
+              <UserPlus size={14} className="text-accent" />
+              New Author
             </h2>
-            <form onSubmit={handleCreate} className="flex flex-col gap-3">
+            <form onSubmit={handleAdd} className="flex flex-col gap-3">
               <div className="relative group">
-                <Library
+                <Users
                   className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/40 group-focus-within:text-accent transition-colors"
                   size={16}
                 />
                 <input
                   type="text"
-                  placeholder="e.g. Science Fiction..."
-                  value={newCategoryName}
-                  onChange={(e) => setNewCategoryName(e.target.value)}
+                  placeholder="Enter author name..."
+                  value={newAuthorName}
+                  onChange={(e) => setNewAuthorName(e.target.value)}
                   className="w-full pl-11 pr-4 py-3 bg-muted/20 border border-border-subtle rounded-2xl text-sm focus:ring-4 focus:ring-accent/10 outline-hidden transition-all"
                 />
               </div>
@@ -131,9 +137,11 @@ export default function CategoryManagement() {
                 type="submit"
                 variant="primary"
                 icon={Plus}
+                isLoading={isAdding}
+                disabled={!newAuthorName.trim()}
                 className="w-full h-11 rounded-2xl font-bold"
               >
-                Add Category
+                Add Author
               </Button>
             </form>
 
@@ -144,26 +152,26 @@ export default function CategoryManagement() {
               </p>
               <div className="flex items-center justify-between bg-muted/10 rounded-2xl px-4 py-3">
                 <span className="text-sm text-muted-foreground">
-                  Total Categories
+                  Total Authors
                 </span>
                 <span className="text-lg font-black text-accent">
-                  {categories.length}
+                  {authors.length}
                 </span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* ── Right: Categories List ── */}
+        {/* ── Right: Authors List ── */}
         <div className="lg:col-span-2">
           <div className="bg-card border border-border-subtle rounded-3xl shadow-sm overflow-hidden">
             {/* List Header */}
             <div className="p-5 border-b border-border-subtle flex flex-col sm:flex-row justify-between items-center gap-3">
               <h2 className="font-bold flex items-center gap-2 text-sm">
-                <BookCopy size={16} className="text-accent" />
-                Active Categories
+                <Users size={16} className="text-accent" />
+                All Authors
                 <span className="ml-1 text-[10px] font-black bg-accent/10 text-accent px-2 py-0.5 rounded-full">
-                  {filteredCategories.length}
+                  {filtered.length}
                 </span>
               </h2>
               <div className="relative w-full sm:w-56">
@@ -173,7 +181,7 @@ export default function CategoryManagement() {
                 />
                 <input
                   type="text"
-                  placeholder="Filter categories..."
+                  placeholder="Search authors..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-9 pr-4 py-2 bg-muted/10 border border-border-subtle rounded-xl text-xs focus:outline-hidden focus:ring-2 focus:ring-accent/10 transition-all"
@@ -181,22 +189,22 @@ export default function CategoryManagement() {
               </div>
             </div>
 
-            {/* Category Rows — hidden scrollbar */}
+            {/* Author Rows — hidden scrollbar */}
             <div
               className="overflow-y-auto max-h-[460px]"
               style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
             >
               <style>{`.no-sb::-webkit-scrollbar { display: none; }`}</style>
 
-              {filteredCategories.length > 0 ? (
+              {filtered.length > 0 ? (
                 <ul className="divide-y divide-border-subtle no-sb">
-                  {filteredCategories.map((cat, index) => (
+                  {filtered.map((author, index) => (
                     <li
-                      key={cat.categoryId}
+                      key={author.authorId}
                       className="group flex items-center justify-between px-5 py-3.5 hover:bg-muted/5 transition-colors"
                     >
-                      {/* Left: index + name */}
-                      {editingId === cat.categoryId ? (
+                      {/* Left: index + avatar + name */}
+                      {editingId === author.authorId ? (
                         <div className="flex items-center gap-2 flex-1 animate-in zoom-in-95 duration-200">
                           <input
                             autoFocus
@@ -205,7 +213,8 @@ export default function CategoryManagement() {
                             className="flex-1 px-3 py-1.5 bg-background border border-accent rounded-xl text-sm outline-hidden shadow-inner max-w-xs"
                           />
                           <button
-                            onClick={() => handleUpdate(cat.categoryId)}
+                            onClick={() => handleUpdate(author.authorId)}
+                            disabled={isUpdating}
                             className="p-1.5 text-emerald-500 hover:bg-emerald-500/10 rounded-lg transition-colors"
                           >
                             <Check size={16} strokeWidth={3} />
@@ -222,30 +231,31 @@ export default function CategoryManagement() {
                           <span className="text-[10px] font-black text-muted-foreground/40 w-5 text-right shrink-0">
                             {String(index + 1).padStart(2, "0")}
                           </span>
-                          <div className="w-1.5 h-1.5 rounded-full bg-accent/50 shrink-0" />
+                          <div className="w-8 h-8 rounded-xl bg-accent/10 text-accent flex items-center justify-center text-xs font-black shrink-0">
+                            {author.name.charAt(0).toUpperCase()}
+                          </div>
                           <span className="font-semibold text-sm text-foreground truncate">
-                            {cat.name}
+                            {author.name}
                           </span>
                         </div>
                       )}
 
                       {/* Right: action buttons */}
-                      {editingId !== cat.categoryId && (
+                      {editingId !== author.authorId && (
                         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-4">
                           <button
                             onClick={() => {
-                              setEditingId(cat.categoryId);
-                              setEditName(cat.name);
+                              setEditingId(author.authorId);
+                              setEditName(author.name);
                             }}
                             className="p-2 text-muted-foreground hover:text-accent hover:bg-accent/10 rounded-xl transition-all"
                           >
                             <Edit2 size={14} />
                           </button>
                           <button
-                            onClick={() => {
-                              setCategoryToDelete(cat);
-                              setIsDeleteModalOpen(true);
-                            }}
+                            onClick={() =>
+                              setDeleteModal({ isOpen: true, author })
+                            }
                             className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all"
                           >
                             <Trash2 size={14} />
@@ -257,8 +267,12 @@ export default function CategoryManagement() {
                 </ul>
               ) : (
                 <div className="flex flex-col items-center justify-center py-16 text-muted-foreground gap-2">
-                  <BookCopy size={32} className="opacity-20" />
-                  <p className="text-sm italic">No categories found.</p>
+                  <Users size={32} className="opacity-20" />
+                  <p className="text-sm italic">
+                    {searchQuery
+                      ? `No authors matching "${searchQuery}"`
+                      : "No authors yet."}
+                  </p>
                 </div>
               )}
             </div>
@@ -267,11 +281,11 @@ export default function CategoryManagement() {
       </div>
 
       <ConfirmModal
-        isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, author: null })}
         onConfirm={handleDelete}
-        title="Delete Category"
-        message={`Are you sure you want to remove "${categoryToDelete?.name}"? Books currently in this category will become uncategorized.`}
+        title="Remove Author"
+        message={`Are you sure you want to delete "${deleteModal.author?.name}"? This may be restricted if the author has active books.`}
       />
     </div>
   );

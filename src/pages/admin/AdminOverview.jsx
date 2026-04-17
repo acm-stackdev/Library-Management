@@ -4,6 +4,7 @@ import {
   adminService,
   booksService,
   subscriptionService,
+  borrowService,
 } from "../../services/apiservices";
 import LoadingState from "../../components/ui/LoadingState";
 import { useToast } from "../../context/ToastContext";
@@ -12,7 +13,7 @@ export default function AdminOverview() {
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalBooks: 0,
-    activeBorrows: 12,
+    activeBorrows: 0,
     totalSubscribers: 0,
   });
   const [topWishlisted, setTopWishlisted] = useState([]);
@@ -23,19 +24,25 @@ export default function AdminOverview() {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        const [users, books, wishlistSummary, subscriptions] =
+        const [users, books, wishlistSummary, subscriptions, allBorrows] =
           await Promise.all([
             adminService.getAllUsers(),
             booksService.getAll(),
             adminService.getWishlistSummary(),
             subscriptionService.getAll(),
+            borrowService.adminGetAll(),
           ]);
+
+        const activeCount = allBorrows.filter(
+          (record) => record.returnDate === null,
+        ).length;
 
         setStats((prev) => ({
           ...prev,
           totalUsers: users.length,
           totalBooks: books.length,
           totalSubscribers: subscriptions.length,
+          activeBorrows: activeCount,
         }));
 
         setTopWishlisted(wishlistSummary.slice(0, 5));

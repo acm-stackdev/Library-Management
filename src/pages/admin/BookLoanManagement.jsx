@@ -119,15 +119,15 @@ export default function BookLoanManagement() {
 
       {/* Loan Table */}
       <div className="bg-card border border-border-subtle rounded-3xl shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm whitespace-nowrap">
+        <div className="bg-card border border-border-subtle rounded-3xl shadow-sm overflow-hidden">
+          <table className="w-full text-left text-sm table-fixed">
             <thead>
               <tr className="bg-muted/20 border-b border-border-subtle text-[10px] font-black uppercase text-muted-foreground tracking-widest">
-                <th className="px-8 py-5">Book Details</th>
-                <th className="px-8 py-5">Borrowed By</th>
-                <th className="px-8 py-5">Status</th>
-                <th className="px-8 py-5">Due Date</th>
-                <th className="px-8 py-5 text-right">Actions</th>
+                <th className="px-4 py-4 w-[28%]">Book Details</th>
+                <th className="px-4 py-4 w-[22%]">Borrowed By</th>
+                <th className="px-4 py-4 w-[18%]">Status</th>
+                <th className="px-4 py-4 w-[17%]">Due Date</th>
+                <th className="px-4 py-4 w-[15%] text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border-subtle">
@@ -135,16 +135,14 @@ export default function BookLoanManagement() {
                 filteredRecords.map((record) => {
                   const status = getStatus(record);
                   const StatusIcon = status.icon;
-
                   return (
                     <tr
                       key={record.borrowRecordId}
                       className="hover:bg-muted/5 transition-colors"
                     >
-                      {/* Book Info */}
-                      <td className="px-8 py-5">
-                        <div className="flex flex-col">
-                          <span className="font-bold text-foreground text-base tracking-tight">
+                      <td className="px-4 py-4">
+                        <div className="flex flex-col min-w-0">
+                          <span className="font-bold text-foreground text-sm tracking-tight truncate">
                             {record.bookTitle}
                           </span>
                           <span className="text-[10px] font-mono text-muted-foreground">
@@ -153,30 +151,29 @@ export default function BookLoanManagement() {
                         </div>
                       </td>
 
-                      {/* User Info */}
-                      <td className="px-8 py-5">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-12 h-12 rounded-2xl bg-linear-to-br from-accent to-accent/60 flex items-center justify-center text-white font-black shadow-inner">
+                      <td className="px-4 py-4">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="w-9 h-9 shrink-0 rounded-xl bg-linear-to-br from-accent to-accent/60 flex items-center justify-center text-white font-black shadow-inner text-sm">
                             {record.userName?.charAt(0).toUpperCase()}
                           </div>
-                          <span className="font-medium">{record.userName}</span>
+                          <span className="font-medium truncate">
+                            {record.userName}
+                          </span>
                         </div>
                       </td>
 
-                      {/* Dynamic Status Badge */}
-                      <td className="px-8 py-5">
+                      <td className="px-4 py-4">
                         <span
-                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-[10px] font-black uppercase tracking-tighter ${status.color}`}
+                          className={`inline-flex items-center gap-1 px-2 py-1 rounded-full border text-[10px] font-black uppercase tracking-tighter ${status.color}`}
                         >
-                          <StatusIcon size={12} />
+                          <StatusIcon size={11} />
                           {status.label}
                         </span>
                       </td>
 
-                      {/* Dates */}
-                      <td className="px-8 py-5">
+                      <td className="px-4 py-4">
                         <div className="flex flex-col">
-                          <span className="text-foreground font-semibold">
+                          <span className="text-foreground font-semibold text-xs">
                             {new Date(record.dueDate).toLocaleDateString()}
                           </span>
                           <span className="text-[10px] text-muted-foreground">
@@ -186,23 +183,22 @@ export default function BookLoanManagement() {
                         </div>
                       </td>
 
-                      {/* Return Action */}
-                      <td className="px-8 py-5 text-right">
+                      <td className="px-4 py-4 text-right">
                         {!record.returnDate ? (
                           <Button
                             size="sm"
                             variant="primary"
                             icon={RotateCcw}
-                            className="rounded-xl font-bold py-1.5 h-9"
+                            className="rounded-xl font-bold text-xs py-1 h-8"
                             onClick={() => {
                               setSelectedRecord(record);
                               setIsReturnModalOpen(true);
                             }}
                           >
-                            Return Book
+                            Return
                           </Button>
                         ) : (
-                          <div className="flex flex-col items-end pr-2 text-emerald-500">
+                          <div className="flex flex-col items-end text-emerald-500">
                             <span className="text-[10px] font-black uppercase">
                               Returned On
                             </span>

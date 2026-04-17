@@ -273,8 +273,6 @@ export const borrowService = {
       const response = await api.post(`/BorrowRecord/borrow/${bookId}`);
       return response.data;
     } catch (error) {
-      // The backend sends specific error messages (e.g., "Limit reached")
-      // We'll catch these in the UI to show to the user
       throw error;
     }
   },
@@ -299,3 +297,4 @@ export const borrowService = {
 export const booksService = createApiService("/books");
 export const categoriesService = createApiService("/category");
 export const wishlistService = createApiService("/Wishlist");
+export const authorsService = createApiService("/Author");
