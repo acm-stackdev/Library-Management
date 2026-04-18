@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Heart, Trash2, ArrowRight, Search, BookMarked } from "lucide-react";
 import { wishlistService } from "../../services/apiservices";
-import { useToast } from "../../context/ToastContext";
+import { useToast } from "../../context/useToast";
 import LoadingState from "../../components/ui/LoadingState";
 
 export default function UserWishlist() {
@@ -12,21 +12,21 @@ export default function UserWishlist() {
   const navigate = useNavigate();
   const toast = useToast();
 
-  const fetchWishlist = async () => {
+  const fetchWishlist = useCallback(async () => {
     try {
       setLoading(true);
       const data = await wishlistService.getAll();
       setWishlist(data);
-    } catch (error) {
+    } catch {
       toast.error("Failed to load wishlist");
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
     fetchWishlist();
-  }, []);
+  }, [fetchWishlist]);
 
   const handleRemove = async (e, wishlistId) => {
     e.stopPropagation(); // Prevent navigating to book details
@@ -37,7 +37,7 @@ export default function UserWishlist() {
         prev.filter((item) => item.wishlistId !== wishlistId),
       );
       window.dispatchEvent(new Event("wishlistUpdated"));
-    } catch (error) {
+    } catch {
       toast.error("Failed to remove item");
     }
   };

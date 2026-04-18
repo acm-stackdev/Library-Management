@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { X, ChevronLeft } from "lucide-react";
-import { useToast } from "../../context/ToastContext";
+import { useToast } from "../../context/useToast";
 
 // Forms
 import LoginForm from "../auth/LoginForm";
@@ -17,7 +17,6 @@ export default function AuthModal({ isOpen, onClose }) {
 
   const toast = useToast();
 
-  // Prevent background scrolling when modal is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -50,7 +49,7 @@ export default function AuthModal({ isOpen, onClose }) {
     } else {
       if (view === "forgot") {
         setView("login");
-        setStep(2); // Go back to the password step of login
+        setStep(2);
       } else if (view === "reset") {
         setView("forgot");
         setStep(1);
@@ -94,7 +93,6 @@ export default function AuthModal({ isOpen, onClose }) {
 
   return (
     <div className="fixed inset-0 z-100 flex items-center justify-center p-4 sm:p-6">
-      {/* Premium Backdrop */}
       <div
         className="fixed inset-0 bg-background/30 backdrop-blur-md transition-opacity duration-300"
         onClick={handleModalClose}

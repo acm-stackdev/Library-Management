@@ -2,7 +2,7 @@ import { Sun, Moon, LogOut, User, Plus, ShieldCheck } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/useAuth";
-import { useToast } from "../../context/ToastContext";
+import { useToast } from "../../context/useToast";
 import AuthModal from "./AuthModal";
 import BookModal from "./BookModal";
 import Button from "../ui/Button";

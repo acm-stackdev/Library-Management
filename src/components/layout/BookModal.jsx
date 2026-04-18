@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 import { booksService } from "../../services/apiservices";
-import { useToast } from "../../context/ToastContext";
+import { useToast } from "../../context/useToast";
 import BookForm from "../books/BookForm";
 
 export default function BookModal({ isOpen, onClose }) {
@@ -15,7 +15,7 @@ export default function BookModal({ isOpen, onClose }) {
       toast.success("New book added to library!");
       onClose();
       window.dispatchEvent(new Event("bookCreated"));
-    } catch (err) {
+    } catch {
       toast.error("Failed to create book. Check your inputs.");
     } finally {
       setLoading(false);

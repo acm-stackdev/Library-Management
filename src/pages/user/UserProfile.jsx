@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Shield,
@@ -18,7 +18,7 @@ import {
   borrowService,
 } from "../../services/apiservices";
 import { useAuth } from "../../context/useAuth";
-import { useToast } from "../../context/ToastContext";
+import { useToast } from "../../context/useToast";
 import LoadingState from "../../components/ui/LoadingState";
 import Button from "../../components/ui/Button";
 
@@ -34,7 +34,7 @@ export default function UserProfile() {
     loading: true,
   });
 
-  const fetchMemberData = async () => {
+  const fetchMemberData = useCallback(async () => {
     try {
       const [sub, wishlist, loans] = await Promise.all([
         subscriptionService.getMySubscription().catch(() => null),
@@ -48,15 +48,18 @@ export default function UserProfile() {
         loans: loans,
         loading: false,
       });
-    } catch (error) {
+    } catch {
       toast.error("Failed to sync profile");
       setData((prev) => ({ ...prev, loading: false }));
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
-    fetchMemberData();
-  }, []);
+    const load = async () => {
+      await fetchMemberData();
+    };
+    load();
+  }, [fetchMemberData]);
 
   const handleReturn = async (loanId, title) => {
     try {

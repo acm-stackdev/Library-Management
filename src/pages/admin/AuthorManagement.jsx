@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Users,
   Plus,
@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 
 import { authorsService } from "../../services/apiservices";
-import { useToast } from "../../context/ToastContext";
+import { useToast } from "../../context/useToast";
 import Button from "../../components/ui/Button";
 import LoadingState from "../../components/ui/LoadingState";
 import ConfirmModal from "../../components/ui/ConfirmModal";
@@ -32,21 +32,21 @@ export default function AuthorManagement() {
 
   const toast = useToast();
 
-  const fetchAuthors = async () => {
+  const fetchAuthors = useCallback(async () => {
     try {
       setLoading(true);
       const data = await authorsService.getAll();
       setAuthors(data);
-    } catch (error) {
+    } catch {
       toast.error("Failed to sync author database");
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
     fetchAuthors();
-  }, []);
+  }, [fetchAuthors]);
 
   const handleAdd = async (e) => {
     e.preventDefault();
@@ -57,7 +57,7 @@ export default function AuthorManagement() {
       toast.success(`"${newAuthorName}" added to system`);
       setNewAuthorName("");
       fetchAuthors();
-    } catch (err) {
+    } catch {
       toast.error("Could not create author");
     } finally {
       setIsAdding(false);
@@ -72,7 +72,7 @@ export default function AuthorManagement() {
       toast.success("Author renamed successfully");
       setEditingId(null);
       fetchAuthors();
-    } catch (err) {
+    } catch {
       toast.error("Update failed");
     } finally {
       setIsUpdating(false);
@@ -84,7 +84,7 @@ export default function AuthorManagement() {
       await authorsService.delete(deleteModal.author.authorId);
       toast.success("Author removed from catalog");
       fetchAuthors();
-    } catch (err) {
+    } catch {
       toast.error("Delete restricted: Author likely has active books.");
     } finally {
       setDeleteModal({ isOpen: false, author: null });

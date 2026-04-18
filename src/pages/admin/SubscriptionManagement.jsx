@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   CreditCard,
   Search,
@@ -13,7 +13,7 @@ import {
 
 // Services
 import { subscriptionService, adminService } from "../../services/apiservices";
-import { useToast } from "../../context/ToastContext";
+import { useToast } from "../../context/useToast";
 
 // UI Components
 import Button from "../../components/ui/Button";
@@ -30,7 +30,7 @@ export default function SubscriptionManagement() {
 
   const toast = useToast();
 
-  const fetchEverything = async () => {
+  const fetchEverything = useCallback(async () => {
     try {
       setLoading(true);
       const [users, subs] = await Promise.all([
@@ -46,16 +46,16 @@ export default function SubscriptionManagement() {
         });
 
       setData(combined);
-    } catch (error) {
+    } catch {
       toast.error("Failed to sync library data");
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
     fetchEverything();
-  }, []);
+  }, [fetchEverything]);
 
   const handleAddMonth = async (userId, months) => {
     try {
@@ -65,7 +65,7 @@ export default function SubscriptionManagement() {
       });
       toast.success(`Added ${months} month(s) to account`);
       fetchEverything();
-    } catch (error) {
+    } catch {
       toast.error("Failed to update subscription");
     }
   };
@@ -75,7 +75,7 @@ export default function SubscriptionManagement() {
       await subscriptionService.deleteByUserId(subToDelete.userId);
       toast.success("Subscription revoked");
       fetchEverything();
-    } catch (error) {
+    } catch {
       toast.error("Action failed");
     } finally {
       setIsDeleteModalOpen(false);

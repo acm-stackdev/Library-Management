@@ -9,9 +9,7 @@ export default function AuthRequirements({ requirements, isVisible }) {
         <div
           key={i}
           className={`flex items-center gap-2 text-[11px] font-bold transition-all duration-300 ${
-            req.met
-              ? "text-green-500/50" // Mute it when done to declutter
-              : "text-muted-foreground" // Keep it clear when missing
+            req.met ? "text-green-500/50" : "text-muted-foreground"
           }`}
         >
           {req.met ? (

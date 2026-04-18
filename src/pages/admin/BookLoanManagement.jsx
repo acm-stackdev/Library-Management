@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   ArrowLeftRight,
   Search,
@@ -12,7 +12,7 @@ import {
 
 // Services
 import { borrowService } from "../../services/apiservices";
-import { useToast } from "../../context/ToastContext";
+import { useToast } from "../../context/useToast";
 
 // UI Components
 import Button from "../../components/ui/Button";
@@ -30,28 +30,28 @@ export default function BookLoanManagement() {
 
   const toast = useToast();
 
-  const fetchRecords = async () => {
+  const fetchRecords = useCallback(async () => {
     try {
       setLoading(true);
       const data = await borrowService.adminGetAll();
       setRecords(data);
-    } catch (error) {
+    } catch {
       toast.error("Failed to load lending records");
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
     fetchRecords();
-  }, []);
+  }, [fetchRecords]);
 
   const handleReturn = async () => {
     try {
       await borrowService.returnBook(selectedRecord.borrowRecordId);
       toast.success(`"${selectedRecord.bookTitle}" has been returned`);
       fetchRecords();
-    } catch (error) {
+    } catch {
       toast.error("Process failed: Could not mark as returned");
     } finally {
       setIsReturnModalOpen(false);

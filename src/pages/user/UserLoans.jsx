@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { borrowService } from "../../services/apiservices";
-import { useToast } from "../../context/ToastContext";
+import { useToast } from "../../context/useToast";
 import {
   Clock,
   RotateCcw,
@@ -17,21 +17,21 @@ export default function UserLoans() {
   const [loading, setLoading] = useState(true);
   const toast = useToast();
 
-  const fetchLoans = async () => {
+  const fetchLoans = useCallback(async () => {
     try {
       setLoading(true);
       const data = await borrowService.getMyHistory();
       setLoans(data);
-    } catch (error) {
+    } catch {
       toast.error("Failed to sync lending records");
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
     fetchLoans();
-  }, []);
+  }, [fetchLoans]);
 
   const handleReturn = async (loanId, title) => {
     try {

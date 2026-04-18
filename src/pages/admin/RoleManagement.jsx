@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   ShieldCheck,
   Plus,
@@ -9,7 +9,7 @@ import {
   Search,
 } from "lucide-react";
 import { roleService } from "../../services/apiservices";
-import { useToast } from "../../context/ToastContext";
+import { useToast } from "../../context/useToast";
 import Button from "../../components/ui/Button";
 import LoadingState from "../../components/ui/LoadingState";
 import ConfirmModal from "../../components/ui/ConfirmModal";
@@ -26,21 +26,21 @@ export default function RoleManagement() {
 
   const toast = useToast();
 
-  const fetchRoles = async () => {
+  const fetchRoles = useCallback(async () => {
     try {
       setLoading(true);
       const data = await roleService.getAll();
       setRoles(data);
-    } catch (error) {
+    } catch {
       toast.error("Failed to load roles");
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
     fetchRoles();
-  }, []);
+  }, [fetchRoles]);
 
   const handleCreateRole = async (e) => {
     e.preventDefault();
@@ -50,7 +50,7 @@ export default function RoleManagement() {
       toast.success(`Role "${newRoleName}" created`);
       setNewRoleName("");
       fetchRoles();
-    } catch (error) {
+    } catch {
       toast.error("Failed to create role");
     }
   };
@@ -61,7 +61,7 @@ export default function RoleManagement() {
       toast.success("Role updated");
       setEditingRole(null);
       fetchRoles();
-    } catch (error) {
+    } catch {
       toast.error("Failed to update role");
     }
   };
@@ -71,7 +71,7 @@ export default function RoleManagement() {
       await roleService.delete(roleToDelete.id);
       toast.success("Role deleted");
       setRoles(roles.filter((r) => r.id !== roleToDelete.id));
-    } catch (error) {
+    } catch {
       toast.error("Cannot delete role. It may be assigned to users.");
     } finally {
       setIsDeleteModalOpen(false);

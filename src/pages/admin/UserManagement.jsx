@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Trash2, Search, Mail, ShieldCheck, UserCog } from "lucide-react";
 
 // Services & Context
 import { adminService, roleService } from "../../services/apiservices";
-import { useToast } from "../../context/ToastContext";
+import { useToast } from "../../context/useToast";
 
 // UI Components
 import Button from "../../components/ui/Button";
@@ -23,7 +23,7 @@ export default function UserManagement() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   // ── Fetch Users & Roles ──
-  const fetchInitialData = async () => {
+  const fetchInitialData = useCallback(async () => {
     try {
       setLoading(true);
       const [userData, rolesData] = await Promise.all([
@@ -34,16 +34,16 @@ export default function UserManagement() {
 
       // Map roles for the dropdown (Headless UI likes id/name pairs)
       setAvailableRoles(rolesData.map((r) => ({ id: r.name, name: r.name })));
-    } catch (error) {
+    } catch {
       toast.error("Failed to sync with library database");
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
     fetchInitialData();
-  }, []);
+  }, [fetchInitialData]);
 
   // ── Role Assignment ──
   const handleRoleChange = async (userId, newRoleName) => {
@@ -55,7 +55,7 @@ export default function UserManagement() {
       setUsers((prev) =>
         prev.map((u) => (u.id === userId ? { ...u, roles: [newRoleName] } : u)),
       );
-    } catch (error) {
+    } catch {
       toast.error("Role update failed. Verify admin permissions.");
     }
   };
@@ -68,7 +68,7 @@ export default function UserManagement() {
       await adminService.deleteUser(userToDelete.id);
       setUsers((prev) => prev.filter((u) => u.id !== userToDelete.id));
       toast.success("User permanently removed");
-    } catch (error) {
+    } catch {
       toast.error("Could not delete user");
     } finally {
       setIsDeleting(false);
@@ -79,7 +79,7 @@ export default function UserManagement() {
   const filteredUsers = users.filter(
     (u) =>
       u.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      u.email?.toLowerCase().includes(query.toLowerCase()),
+      u.email?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   if (loading) return <LoadingState />;
@@ -207,3 +207,4 @@ export default function UserManagement() {
     </div>
   );
 }
+

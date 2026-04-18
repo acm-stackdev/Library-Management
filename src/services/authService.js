@@ -2,15 +2,11 @@ import api from "./api";
 
 const authService = {
   login: async (email, password) => {
-    try {
-      const response = await api.post("/account/login", { email, password });
-      if (response.data.token) {
-        localStorage.setItem("user", JSON.stringify(response.data));
-      }
-      return response.data;
-    } catch (error) {
-      throw error;
+    const response = await api.post("/account/login", { email, password });
+    if (response.data.token) {
+      localStorage.setItem("user", JSON.stringify(response.data));
     }
+    return response.data;
   },
 
   register: async (name, email, password) => {

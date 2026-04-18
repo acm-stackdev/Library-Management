@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 
 // Services & Context
 import { booksService, wishlistService } from "../services/apiservices";
 import { useAuth } from "../context/useAuth";
+import { useToast } from "../context/useToast";
 
 // UI Components
 import BookCard from "../components/books/BookCard";
@@ -12,6 +14,8 @@ import SearchBar from "../components/ui/SearchBar";
 
 export default function Home() {
   const { user } = useAuth();
+  const toast = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [books, setBooks] = useState([]);
   const [wishlist, setWishlist] = useState([]);
@@ -19,6 +23,16 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+
+  // ── Handle Session Expiration ──
+  useEffect(() => {
+    if (searchParams.get("session_expired")) {
+      toast.info("Your session has expired. Please log in again.");
+      // Remove the parameter from URL without full reload
+      searchParams.delete("session_expired");
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams, toast]);
 
   // ── Fetch Books & Wishlist ──
   const fetchData = useCallback(async () => {

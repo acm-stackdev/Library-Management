@@ -4,7 +4,7 @@ import Button from "../ui/Button";
 import FormInput from "../ui/FormInput";
 import FormError from "../ui/FormError";
 import { Mail } from "lucide-react";
-import { useToast } from "../../context/ToastContext";
+import { useToast } from "../../context/useToast";
 
 export default function ForgotForm({ email, setEmail, onSuccess }) {
   const [error, setError] = useState("");

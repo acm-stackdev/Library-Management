@@ -18,7 +18,6 @@ export default function LoginForm({
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isEmailUnconfirmed, setIsEmailUnconfirmed] = useState(false);
   const { login } = useAuth();
 
   const handleNext = (e) => {
@@ -43,7 +42,6 @@ export default function LoginForm({
       const status = err.response?.status;
       const data = err.response?.data;
       if (status === 403 || data?.code === "EMAIL_NOT_CONFIRMED") {
-        setIsEmailUnconfirmed(true);
         setError(data?.message || "Please confirm your email first.");
       } else if (status === 401) {
         setError("Invalid email or password.");

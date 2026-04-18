@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Library,
   Plus,
@@ -11,7 +11,7 @@ import {
   Tag,
 } from "lucide-react";
 import { categoriesService } from "../../services/apiservices";
-import { useToast } from "../../context/ToastContext";
+import { useToast } from "../../context/useToast";
 import Button from "../../components/ui/Button";
 import LoadingState from "../../components/ui/LoadingState";
 import ConfirmModal from "../../components/ui/ConfirmModal";
@@ -28,21 +28,21 @@ export default function CategoryManagement() {
 
   const toast = useToast();
 
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
       setLoading(true);
       const data = await categoriesService.getAll();
       setCategories(data);
-    } catch (error) {
+    } catch {
       toast.error("Failed to load categories");
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
     fetchCategories();
-  }, []);
+  }, [fetchCategories]);
 
   const handleCreate = async (e) => {
     e.preventDefault();
@@ -52,7 +52,7 @@ export default function CategoryManagement() {
       toast.success(`Category "${newCategoryName}" added`);
       setNewCategoryName("");
       fetchCategories();
-    } catch (error) {
+    } catch {
       toast.error("Failed to create category");
     }
   };
@@ -64,7 +64,7 @@ export default function CategoryManagement() {
       toast.success("Category renamed");
       setEditingId(null);
       fetchCategories();
-    } catch (error) {
+    } catch {
       toast.error("Update failed");
     }
   };
@@ -76,7 +76,7 @@ export default function CategoryManagement() {
       setCategories(
         categories.filter((c) => c.categoryId !== categoryToDelete.categoryId),
       );
-    } catch (error) {
+    } catch {
       toast.error(
         "Cannot delete category; it may be linked to existing books.",
       );

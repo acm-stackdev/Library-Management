@@ -1,6 +1,5 @@
 export default function EditInput({
   label,
-  icon: Icon,
   name,
   value,
   onChange,
@@ -10,7 +9,7 @@ export default function EditInput({
   return (
     <div className="space-y-1">
       <div className="flex items-center gap-1.5 text-[10px] text-muted uppercase font-bold tracking-wider">
-        <Icon className="h-3 w-3" /> {label}
+        {label}
       </div>
       <input
         name={name}

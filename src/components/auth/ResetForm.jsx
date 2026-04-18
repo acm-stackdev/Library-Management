@@ -5,7 +5,7 @@ import FormInput from "../ui/FormInput";
 import FormError from "../ui/FormError";
 import AuthRequirements from "../ui/AuthRequirements";
 import { KeyRound, Lock } from "lucide-react";
-import { useToast } from "../../context/ToastContext";
+import { useToast } from "../../context/useToast";
 
 export default function ResetForm({
   step,

@@ -269,28 +269,14 @@ export const borrowService = {
 
   // POST: /api/BorrowRecord/borrow/{bookId}
   borrowBook: async (bookId) => {
-    try {
-      const response = await api.post(`/BorrowRecord/borrow/${bookId}`);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await api.post(`/BorrowRecord/borrow/${bookId}`);
+    return response.data;
   },
 
   // DELETE: /api/BorrowRecord/return/{borrowRecordId}
   returnBook: async (borrowRecordId) => {
-    try {
-      const response = await api.delete(
-        `/BorrowRecord/return/${borrowRecordId}`,
-      );
-      return response.data;
-    } catch (error) {
-      console.error(
-        `Error processing return for record ${borrowRecordId}:`,
-        error,
-      );
-      throw error;
-    }
+    const response = await api.delete(`/BorrowRecord/return/${borrowRecordId}`);
+    return response.data;
   },
 };
 
