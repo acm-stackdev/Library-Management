@@ -41,17 +41,21 @@ export default function Header() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Close mobile menu when navigating
-  useEffect(() => {
-    setIsMobileMenuOpen(false);
-  }, [navigate]);
-
   const toggleTheme = () => setIsDarkMode(!isDarkMode);
+
+  const closeMenus = () => {
+    setIsMobileMenuOpen(false);
+    setIsDropdownOpen(false);
+  };
+
+  const handleNavigation = (path) => {
+    closeMenus();
+    navigate(path);
+  };
 
   const handleLogout = () => {
     logout();
-    setIsDropdownOpen(false);
-    setIsMobileMenuOpen(false);
+    closeMenus();
     toast.info("Logged out successfully");
     navigate("/");
   };
@@ -67,6 +71,7 @@ export default function Header() {
         <div className="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8 h-16 md:h-20">
           <Link
             to="/"
+            onClick={closeMenus}
             className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity group"
           >
             <img
@@ -130,7 +135,7 @@ export default function Header() {
                     {isAdmin ? (
                       <div className="p-2">
                         <button
-                          onClick={() => navigate("/admin")}
+                          onClick={() => handleNavigation("/admin")}
                           className="w-full flex items-center gap-3 px-3 py-2 text-sm text-accent hover:bg-accent/10 rounded-xl transition-colors font-medium"
                         >
                           <ShieldCheck className="w-4 h-4" />
@@ -140,7 +145,7 @@ export default function Header() {
                     ) : (
                       <div className="p-2">
                         <button
-                          onClick={() => navigate("/profile")}
+                          onClick={() => handleNavigation("/profile")}
                           className="w-full flex items-center gap-3 px-3 py-2 text-sm text-accent hover:bg-accent/10 rounded-xl transition-colors font-medium"
                         >
                           <User className="w-4 h-4" />
@@ -221,7 +226,7 @@ export default function Header() {
                         <button
                           onClick={() => {
                             setIsBookModalOpen(true);
-                            setIsMobileMenuOpen(false);
+                            closeMenus();
                           }}
                           className="w-full flex items-center gap-3 px-4 py-3 text-base font-medium text-foreground hover:bg-accent/10 hover:text-accent rounded-xl transition-colors"
                         >
@@ -229,7 +234,7 @@ export default function Header() {
                           Add New Book
                         </button>
                         <button
-                          onClick={() => navigate("/admin")}
+                          onClick={() => handleNavigation("/admin")}
                           className="w-full flex items-center gap-3 px-4 py-3 text-base font-medium text-foreground hover:bg-accent/10 hover:text-accent rounded-xl transition-colors"
                         >
                           <ShieldCheck className="w-5 h-5" />
@@ -239,7 +244,7 @@ export default function Header() {
                     )}
                     {!isAdmin && (
                       <button
-                        onClick={() => navigate("/profile")}
+                        onClick={() => handleNavigation("/profile")}
                         className="w-full flex items-center gap-3 px-4 py-3 text-base font-medium text-foreground hover:bg-accent/10 hover:text-accent rounded-xl transition-colors"
                       >
                         <User className="w-5 h-5" />
@@ -263,7 +268,7 @@ export default function Header() {
                   <Button
                     onClick={() => {
                       setIsLoginOpen(true);
-                      setIsMobileMenuOpen(false);
+                      closeMenus();
                     }}
                     variant="solid"
                     size="lg"

@@ -319,7 +319,7 @@ export default function BookDetails() {
                 handleChange={handleChange}
               />
 
-              {isAdmin ? (
+              {user && (isAdmin ? (
                 <BookAdminActions
                   isEditing={isEditing}
                   isSaving={isSaving}
@@ -334,7 +334,7 @@ export default function BookDetails() {
                   onBorrow={handleBorrow}
                   loading={isBorrowing}
                 />
-              )}
+              ))}
 
               <ConfirmModal
                 isOpen={isDeleteModalOpen}
