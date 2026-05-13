@@ -60,7 +60,8 @@ The system implements several critical business rules to ensure operational inte
 
 ### 1. Backend (ASP.NET Core)
 
-1. You need to ready the backend API first.
+1. Check the backend Web API source code here:  
+   [LibraryManagementWebApi GitHub Repository](https://github.com/acm-stackdev/LibraryManagementWebApi)
 
 ### 2. Frontend (React + Vite)
 
